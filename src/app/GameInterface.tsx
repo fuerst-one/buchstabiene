@@ -86,17 +86,20 @@ export const GameInterface = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 container max-w-lg p-4">
       <h1 className="text-xl font-bold text-center w-full">
         Buchstabier-Biene
       </h1>
       {showCorrectWords ? (
         <div
-          className="flex items-center flex-wrap bg-white/10 h-8 rounded-sm px-1"
+          className="grid grid-cols-2 items-start justify-start flex-wrap bg-white/10 h-[calc(100vh-10rem)] rounded-sm p-1"
           onClick={() => setShowCorrectWords(false)}
         >
-          {foundWords.slice(0, 5).map((word) => (
-            <div key={word} className="text-white font-bold px-1 uppercase">
+          {foundWords.toReversed().map((word) => (
+            <div
+              key={word}
+              className="text-white font-bold px-1 uppercase w-1/2"
+            >
               {word}
             </div>
           ))}
@@ -109,7 +112,7 @@ export const GameInterface = ({
           >
             {foundWords
               .toReversed()
-              .slice(-5)
+              .slice(0, 5)
               .map((word) => (
                 <div key={word} className="text-white font-bold px-1 uppercase">
                   {word}
@@ -169,8 +172,8 @@ export const GameInterface = ({
             </div>
           </div>
           <div className="flex justify-center items-center gap-3">
-            <Button onClick={shuffleLetters}>Zufall</Button>
             <Button onClick={deleteLetter}>Löschen</Button>
+            <Button onClick={shuffleLetters}>Zufall</Button>
             <Button onClick={enterWord}>Prüfen</Button>
           </div>
         </>
