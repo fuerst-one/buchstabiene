@@ -29,6 +29,8 @@ export const GameInterface = ({
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [showCorrectWords, setShowCorrectWords] = useState(false);
 
+  const isBusy = isError || isCorrect || isDuplicate;
+
   useEffect(() => {
     const savedStateContent = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!savedStateContent) {
@@ -46,20 +48,29 @@ export const GameInterface = ({
   };
 
   const addLetter = (letter: string) => {
+    if (isBusy) {
+      return;
+    }
     setSelectedLetters((prev) => [...prev, letter]);
   };
 
   const deleteLetter = () => {
+    if (isBusy) {
+      return;
+    }
     setSelectedLetters((prev) => prev.slice(0, -1));
   };
 
   const enterWord = () => {
+    if (isBusy) {
+      return;
+    }
     const word = selectedLetters.join("");
     if (possibleWords.includes(word) && !foundWords.includes(word)) {
       setIsCorrect(true);
       setTimeout(() => {
-        setIsCorrect(false);
         setSelectedLetters([]);
+        setIsCorrect(false);
       }, 1000);
       const newFoundWords = [...foundWords, word];
       setFoundWords(newFoundWords);
@@ -71,38 +82,37 @@ export const GameInterface = ({
         })
       );
     } else if (foundWords.includes(word)) {
-      setSelectedLetters([]);
       setIsDuplicate(true);
       setTimeout(() => {
+        setSelectedLetters([]);
         setIsDuplicate(false);
       }, 1000);
     } else {
-      setSelectedLetters([]);
       setIsError(true);
       setTimeout(() => {
+        setSelectedLetters([]);
         setIsError(false);
       }, 1000);
     }
   };
 
   return (
-    <div className="flex flex-col gap-4 container max-w-lg p-4">
+    <div className="flex flex-col gap-6 container max-w-lg p-4">
       <h1 className="text-xl font-bold text-center w-full">
         Buchstabier-Biene
       </h1>
       {showCorrectWords ? (
         <div
-          className="grid grid-cols-2 items-start justify-start flex-wrap bg-white/10 h-[calc(100vh-10rem)] rounded-sm p-1"
+          className="h-[calc(100vh-10rem)] bg-white/10 rounded-sm p-1 overflow-y-auto"
           onClick={() => setShowCorrectWords(false)}
         >
-          {foundWords.toReversed().map((word) => (
-            <div
-              key={word}
-              className="text-white font-bold px-1 uppercase w-1/2"
-            >
-              {word}
-            </div>
-          ))}
+          <div className="columns-2">
+            {foundWords.sort().map((word) => (
+              <div key={word} className="text-white px-1 w-1/2 leading-7">
+                {word}
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <>
@@ -110,17 +120,15 @@ export const GameInterface = ({
             className="flex items-center bg-white/10 h-8 rounded-sm px-1"
             onClick={() => setShowCorrectWords(true)}
           >
-            {foundWords
-              .toReversed()
-              .slice(0, 5)
-              .map((word) => (
-                <div key={word} className="text-white font-bold px-1 uppercase">
-                  {word}
-                </div>
-              ))}
+            <div className="text-white px-1 text-ellipsis">
+              {foundWords.toReversed().slice(0, 5).join(", ")}
+            </div>
+            <div className="text-gray-500 px-1">
+              {foundWords.length > 5 ? "... " : ""}({foundWords.length})
+            </div>
           </div>
-          <div className="relative">
-            <div className="uppercase text-white text-center rounded-md w-64 h-10 flex items-center justify-center text-lg font-bold select-none">
+          <div className="relative w-64 h-10 flex justify-center items-center mx-auto text-center">
+            <div className="uppercase text-white text-2xl font-semibold select-none">
               {selectedLetters.join("")}
             </div>
             <div className="absolute top-full left-1/2 -translate-x-1/2">
@@ -139,7 +147,7 @@ export const GameInterface = ({
               )}
             </div>
           </div>
-          <div className="my-6 flex flex-nowrap justify-center items-center">
+          <div className="mb-6 flex flex-nowrap justify-center items-center">
             <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
               <LetterButton onClick={() => addLetter(otherLetters[0])}>
                 {otherLetters[0]}
@@ -187,7 +195,7 @@ const LetterButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "bg-white rounded-sm font-bold h-[4rem] w-[4.5rem] text-black uppercase",
+        "bg-gray-200 text-xl rounded-sm font-bold h-[4rem] w-[4.5rem] text-black uppercase",
         props.className
       )}
       style={{
