@@ -1,17 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
+
+const LOCAL_STORAGE_KEY = "spelling-bee-save-state";
+
+type SaveState = {
+  foundWords: string[];
+  timestamp: number;
+};
 
 export const GameInterface = ({
   letters,
   possibleWords,
+  timestamp,
 }: {
   letters: string[];
   possibleWords: string[];
+  timestamp: number;
 }) => {
-  console.log({ letters, possibleWords });
-
   const mainLetter = letters[0];
   const [otherLetters, setOtherLetters] = useState(letters.slice(1));
 
@@ -19,6 +26,20 @@ export const GameInterface = ({
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [isError, setIsError] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
+  const [showCorrectWords, setShowCorrectWords] = useState(false);
+
+  useEffect(() => {
+    const savedStateContent = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!savedStateContent) {
+      return;
+    }
+    const savedState = JSON.parse(savedStateContent) as SaveState;
+    if (savedState.timestamp !== timestamp) {
+      return;
+    }
+    setFoundWords(savedState.foundWords);
+  }, [timestamp]);
 
   const shuffleLetters = () => {
     setOtherLetters((prev) => [...prev].sort(() => Math.random() - 0.5));
@@ -33,13 +54,30 @@ export const GameInterface = ({
   };
 
   const enterWord = () => {
-    if (possibleWords.includes(selectedLetters.join(""))) {
+    const word = selectedLetters.join("");
+    if (possibleWords.includes(word) && !foundWords.includes(word)) {
       setIsCorrect(true);
       setTimeout(() => {
         setIsCorrect(false);
+        setSelectedLetters([]);
       }, 1000);
-      setFoundWords((prev) => [...prev, selectedLetters.join("")]);
+      const newFoundWords = [...foundWords, word];
+      setFoundWords(newFoundWords);
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          timestamp,
+          foundWords: newFoundWords,
+        })
+      );
+    } else if (foundWords.includes(word)) {
+      setSelectedLetters([]);
+      setIsDuplicate(true);
+      setTimeout(() => {
+        setIsDuplicate(false);
+      }, 1000);
     } else {
+      setSelectedLetters([]);
       setIsError(true);
       setTimeout(() => {
         setIsError(false);
@@ -49,57 +87,94 @@ export const GameInterface = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        {foundWords.slice(0, 5).map((word) => (
-          <div key={word} className="text-white border border-white">
-            {word}
-          </div>
-        ))}
-      </div>
-      <div className="bg-gray-800 text-white text-center rounded-md w-64 h-10 flex items-center justify-center text-lg font-bold select-none">
-        {selectedLetters.join("")}
-      </div>
-      {isCorrect && <div className="text-green-500 text-center">Great!</div>}
-      {isError && (
-        <div className="text-red-500 text-center">Not a valid word</div>
-      )}
-      <div className="my-6 flex flex-nowrap justify-center items-center">
-        <div className="flex flex-col justify-center items-center gap-4">
-          <LetterButton onClick={() => addLetter(otherLetters[0])}>
-            {otherLetters[0]}
-          </LetterButton>
-          <LetterButton onClick={() => addLetter(otherLetters[1])}>
-            {otherLetters[1]}
-          </LetterButton>
+      <h1 className="text-xl font-bold text-center w-full">
+        Buchstabier-Biene
+      </h1>
+      {showCorrectWords ? (
+        <div
+          className="flex items-center flex-wrap bg-white/10 h-8 rounded-sm px-1"
+          onClick={() => setShowCorrectWords(false)}
+        >
+          {foundWords.slice(0, 5).map((word) => (
+            <div key={word} className="text-white font-bold px-1 uppercase">
+              {word}
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col justify-center items-center gap-4">
-          <LetterButton onClick={() => addLetter(otherLetters[2])}>
-            {otherLetters[2]}
-          </LetterButton>
-          <LetterButton
-            onClick={() => addLetter(mainLetter)}
-            className="bg-yellow-500 col-span-2 row-span-2"
+      ) : (
+        <>
+          <div
+            className="flex items-center bg-white/10 h-8 rounded-sm px-1"
+            onClick={() => setShowCorrectWords(true)}
           >
-            {mainLetter}
-          </LetterButton>
-          <LetterButton onClick={() => addLetter(otherLetters[3])}>
-            {otherLetters[3]}
-          </LetterButton>
-        </div>
-        <div className="flex flex-col justify-center items-center gap-4">
-          <LetterButton onClick={() => addLetter(otherLetters[4])}>
-            {otherLetters[4]}
-          </LetterButton>
-          <LetterButton onClick={() => addLetter(otherLetters[5])}>
-            {otherLetters[5]}
-          </LetterButton>
-        </div>
-      </div>
-      <div className="flex justify-center items-center gap-3">
-        <Button onClick={shuffleLetters}>Shuffle</Button>
-        <Button onClick={deleteLetter}>Delete</Button>
-        <Button onClick={enterWord}>Enter</Button>
-      </div>
+            {foundWords
+              .toReversed()
+              .slice(-5)
+              .map((word) => (
+                <div key={word} className="text-white font-bold px-1 uppercase">
+                  {word}
+                </div>
+              ))}
+          </div>
+          <div className="relative">
+            <div className="uppercase text-white text-center rounded-md w-64 h-10 flex items-center justify-center text-lg font-bold select-none">
+              {selectedLetters.join("")}
+            </div>
+            <div className="absolute top-full left-1/2 -translate-x-1/2">
+              {isCorrect && (
+                <div className="text-green-500 text-center">Toll!</div>
+              )}
+              {isError && (
+                <div className="text-red-500 text-center">
+                  Kein valides Wort
+                </div>
+              )}
+              {isDuplicate && (
+                <div className="text-yellow-500 text-center">
+                  Schon gefunden
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="my-6 flex flex-nowrap justify-center items-center">
+            <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+              <LetterButton onClick={() => addLetter(otherLetters[0])}>
+                {otherLetters[0]}
+              </LetterButton>
+              <LetterButton onClick={() => addLetter(otherLetters[1])}>
+                {otherLetters[1]}
+              </LetterButton>
+            </div>
+            <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+              <LetterButton onClick={() => addLetter(otherLetters[2])}>
+                {otherLetters[2]}
+              </LetterButton>
+              <LetterButton
+                onClick={() => addLetter(mainLetter)}
+                className="bg-yellow-500 col-span-2 row-span-2"
+              >
+                {mainLetter}
+              </LetterButton>
+              <LetterButton onClick={() => addLetter(otherLetters[3])}>
+                {otherLetters[3]}
+              </LetterButton>
+            </div>
+            <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+              <LetterButton onClick={() => addLetter(otherLetters[4])}>
+                {otherLetters[4]}
+              </LetterButton>
+              <LetterButton onClick={() => addLetter(otherLetters[5])}>
+                {otherLetters[5]}
+              </LetterButton>
+            </div>
+          </div>
+          <div className="flex justify-center items-center gap-3">
+            <Button onClick={shuffleLetters}>Zufall</Button>
+            <Button onClick={deleteLetter}>Löschen</Button>
+            <Button onClick={enterWord}>Prüfen</Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -109,7 +184,7 @@ const LetterButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "bg-white rounded-sm font-bold h-12 w-14 text-black uppercase",
+        "bg-white rounded-sm font-bold h-[4rem] w-[4.5rem] text-black uppercase",
         props.className
       )}
       style={{
