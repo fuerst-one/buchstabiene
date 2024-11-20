@@ -2,7 +2,7 @@ import { GameInterface } from "../components/GameInterface";
 import { getTodaysGame } from "./getTodaysGame";
 
 export default async function Home() {
-  const { timestamp, letters, possibleWords, maxScore } = await getTodaysGame();
+  const { id, letters, possibleWords } = await getTodaysGame();
   return (
     <div className="min-h-screen flex items-center justify-center bg-foreground text-background">
       <div className="container max-w-lg">
@@ -10,10 +10,9 @@ export default async function Home() {
           BuchstaBiene
         </h1>
         <GameInterface
-          timestamp={timestamp}
+          id={id}
           letters={letters}
           possibleWords={possibleWords}
-          maxScore={maxScore}
         />
       </div>
     </div>

@@ -9,20 +9,18 @@ import { Message, MessageType, messages } from "./utils";
 const LOCAL_STORAGE_KEY = "spelling-bee-save-state";
 
 type SaveState = {
+  id: string;
   foundWords: string[];
-  timestamp: number;
 };
 
 export const GameInterface = ({
-  timestamp,
+  id,
   letters,
   possibleWords,
-  maxScore,
 }: {
-  timestamp: number;
+  id: string;
   letters: string[];
   possibleWords: string[];
-  maxScore: number;
 }) => {
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
@@ -33,11 +31,11 @@ export const GameInterface = ({
       return;
     }
     const savedState = JSON.parse(savedStateContent) as SaveState;
-    if (savedState.timestamp !== timestamp) {
+    if (savedState.id !== id) {
       return;
     }
     setFoundWords(savedState.foundWords);
-  }, [timestamp]);
+  }, [id]);
 
   const flashMessage = async (messageType: MessageType, score?: number) => {
     return new Promise<void>((resolve) => {
@@ -65,7 +63,7 @@ export const GameInterface = ({
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
       JSON.stringify({
-        timestamp,
+        id,
         foundWords: newFoundWords,
       })
     );
@@ -79,7 +77,7 @@ export const GameInterface = ({
 
   return (
     <div className="max-w-xl flex flex-col gap-4">
-      <Stage foundWords={foundWords} maxScore={maxScore} />
+      <Stage foundWords={foundWords} possibleWords={possibleWords} />
       <FoundWords foundWords={foundWords} />
       <WordInput letters={letters} message={message} onSubmit={submitWord} />
     </div>

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const stagesByPercentage = [
+  { percentage: 0, label: "Anfänger" },
   { percentage: 1, label: "Guter Start" },
   { percentage: 2, label: "Solide" },
   { percentage: 5, label: "Nett" },
@@ -16,12 +17,17 @@ const stagesByPercentage = [
 
 export const Stage = ({
   foundWords,
-  maxScore,
+  possibleWords,
 }: {
   foundWords: string[];
-  maxScore: number;
+  possibleWords: string[];
 }) => {
   const [showDetailedScore, setShowDetailedScore] = useState(false);
+
+  const maxScore = possibleWords
+    .filter((word) => word.length <= 7)
+    .reduce((acc, word) => acc + getWordScore(word), 0);
+
   const currentScore = foundWords.reduce(
     (acc, word) => acc + getWordScore(word),
     0
