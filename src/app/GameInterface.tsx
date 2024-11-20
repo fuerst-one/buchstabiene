@@ -1,9 +1,22 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ComponentProps, useEffect, useState } from "react";
+import { ComponentProps, useCallback, useEffect, useState } from "react";
+import { isPangram, getWordScore } from "./utils";
 
 const LOCAL_STORAGE_KEY = "spelling-bee-save-state";
+
+type MessageType = "error" | "duplicate" | "correct" | "pangram";
+type Message = { className: string; text: string; score?: number };
+const messages: Record<MessageType, Message> = {
+  error: { className: "text-red-500", text: "Kein valides Wort" },
+  duplicate: { className: "text-red-500", text: "Schon gefunden" },
+  correct: { className: "text-green-500", text: "Toll!" },
+  pangram: {
+    className: "bg-yellow-500 text-black font-semibold rounded-sm px-1",
+    text: "Pangramm!",
+  },
+};
 
 type SaveState = {
   foundWords: string[];
@@ -19,17 +32,8 @@ export const GameInterface = ({
   possibleWords: string[];
   timestamp: number;
 }) => {
-  const mainLetter = letters[0];
-  const [otherLetters, setOtherLetters] = useState(letters.slice(1));
-
-  const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
-  const [isError, setIsError] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [isDuplicate, setIsDuplicate] = useState(false);
-  const [showCorrectWords, setShowCorrectWords] = useState(false);
-
-  const isBusy = isError || isCorrect || isDuplicate;
+  const [message, setMessage] = useState<Message | null>(null);
 
   useEffect(() => {
     const savedStateContent = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -43,154 +47,188 @@ export const GameInterface = ({
     setFoundWords(savedState.foundWords);
   }, [timestamp]);
 
-  const shuffleLetters = () => {
-    setOtherLetters((prev) => [...prev].sort(() => Math.random() - 0.5));
-  };
-
-  const addLetter = (letter: string) => {
-    if (isBusy) {
-      return;
-    }
-    setSelectedLetters((prev) => [...prev, letter]);
-  };
-
-  const deleteLetter = () => {
-    if (isBusy) {
-      return;
-    }
-    setSelectedLetters((prev) => prev.slice(0, -1));
-  };
-
-  const enterWord = () => {
-    if (isBusy) {
-      return;
-    }
-    const word = selectedLetters.join("");
-    if (possibleWords.includes(word) && !foundWords.includes(word)) {
-      setIsCorrect(true);
+  const flashMessage = async (messageType: MessageType, score?: number) => {
+    return new Promise<void>((resolve) => {
+      setMessage({ ...messages[messageType], score });
       setTimeout(() => {
-        setSelectedLetters([]);
-        setIsCorrect(false);
+        setMessage(null);
+        resolve();
       }, 1000);
-      const newFoundWords = [...foundWords, word];
-      setFoundWords(newFoundWords);
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify({
-          timestamp,
-          foundWords: newFoundWords,
-        })
-      );
-    } else if (foundWords.includes(word)) {
-      setIsDuplicate(true);
-      setTimeout(() => {
-        setSelectedLetters([]);
-        setIsDuplicate(false);
-      }, 1000);
+    });
+  };
+
+  const submitWord = async (word: string) => {
+    if (message) {
+      return;
+    }
+    if (foundWords.includes(word)) {
+      return await flashMessage("duplicate");
+    } else if (!possibleWords.includes(word)) {
+      return await flashMessage("error");
+    }
+
+    const newFoundWords = [...foundWords, word];
+    setFoundWords(newFoundWords);
+    localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify({
+        timestamp,
+        foundWords: newFoundWords,
+      })
+    );
+    const wordScore = getWordScore(word);
+    if (isPangram(word)) {
+      return await flashMessage("pangram", wordScore);
     } else {
-      setIsError(true);
-      setTimeout(() => {
-        setSelectedLetters([]);
-        setIsError(false);
-      }, 1000);
+      return await flashMessage("correct", wordScore);
     }
   };
 
   return (
-    <div className="flex flex-col gap-6 container max-w-lg p-4">
-      <h1 className="text-xl font-bold text-center w-full">
-        Buchstabier-Biene
-      </h1>
-      {showCorrectWords ? (
-        <div
-          className="h-[calc(100vh-10rem)] bg-white/10 rounded-sm p-1 overflow-y-auto"
-          onClick={() => setShowCorrectWords(false)}
-        >
-          <div className="columns-2">
-            {foundWords.sort().map((word) => (
-              <div key={word} className="text-white px-1 w-1/2 leading-7">
-                {word}
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <>
-          <div
-            className="flex items-center bg-white/10 h-8 rounded-sm px-1"
-            onClick={() => setShowCorrectWords(true)}
-          >
-            <div className="text-white px-1 text-ellipsis">
-              {foundWords.toReversed().slice(0, 5).join(", ")}
-            </div>
-            <div className="text-gray-500 px-1">
-              {foundWords.length > 5 ? "... " : ""}({foundWords.length})
-            </div>
-          </div>
-          <div className="relative w-64 h-10 flex justify-center items-center mx-auto text-center">
-            <div className="uppercase text-white text-2xl font-semibold select-none">
-              {selectedLetters.join("")}
-            </div>
-            <div className="absolute top-full left-1/2 -translate-x-1/2">
-              {isCorrect && (
-                <div className="text-green-500 text-center">Toll!</div>
-              )}
-              {isError && (
-                <div className="text-red-500 text-center">
-                  Kein valides Wort
-                </div>
-              )}
-              {isDuplicate && (
-                <div className="text-yellow-500 text-center">
-                  Schon gefunden
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mb-6 flex flex-nowrap justify-center items-center">
-            <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
-              <LetterButton onClick={() => addLetter(otherLetters[0])}>
-                {otherLetters[0]}
-              </LetterButton>
-              <LetterButton onClick={() => addLetter(otherLetters[1])}>
-                {otherLetters[1]}
-              </LetterButton>
-            </div>
-            <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
-              <LetterButton onClick={() => addLetter(otherLetters[2])}>
-                {otherLetters[2]}
-              </LetterButton>
-              <LetterButton
-                onClick={() => addLetter(mainLetter)}
-                className="bg-yellow-500 col-span-2 row-span-2"
-              >
-                {mainLetter}
-              </LetterButton>
-              <LetterButton onClick={() => addLetter(otherLetters[3])}>
-                {otherLetters[3]}
-              </LetterButton>
-            </div>
-            <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
-              <LetterButton onClick={() => addLetter(otherLetters[4])}>
-                {otherLetters[4]}
-              </LetterButton>
-              <LetterButton onClick={() => addLetter(otherLetters[5])}>
-                {otherLetters[5]}
-              </LetterButton>
-            </div>
-          </div>
-          <div className="flex justify-center items-center gap-3">
-            <Button onClick={deleteLetter}>Löschen</Button>
-            <Button onClick={shuffleLetters}>Zufall</Button>
-            <Button onClick={enterWord}>Prüfen</Button>
-          </div>
-        </>
-      )}
-    </div>
+    <>
+      <FoundWords foundWords={foundWords} />
+      <WordInput letters={letters} message={message} onSubmit={submitWord} />
+    </>
   );
 };
 
-const LetterButton = (props: ComponentProps<"button">) => {
+const FoundWords = ({ foundWords }: { foundWords: string[] }) => {
+  const [showAllFoundWords, setShowAllFoundWords] = useState(false);
+  const totalScore = foundWords.reduce(
+    (acc, word) => acc + getWordScore(word),
+    0
+  );
+
+  if (showAllFoundWords) {
+    return (
+      <div
+        className="bg-white/10 rounded-sm p-1 overflow-y-auto"
+        onClick={() => setShowAllFoundWords(false)}
+      >
+        <div className="columns-2">
+          {foundWords.toSorted().map((word) => (
+            <div
+              key={word}
+              className={cn("text-white px-1 w-1/2 leading-7", {
+                "font-bold": isPangram(word),
+              })}
+            >
+              {word}{" "}
+              <span className="text-gray-500">({getWordScore(word)})</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        className="flex items-center bg-white/10 h-8 rounded-sm px-2"
+        onClick={() => setShowAllFoundWords(true)}
+      >
+        <div className="text-white px-1 text-ellipsis">
+          {foundWords.toReversed().slice(0, 5).join(", ")}
+        </div>
+        <div className="text-gray-500">
+          {foundWords.length > 5 ? "... " : ""}({foundWords.length})
+        </div>
+        <div className="mr-0 ml-auto text-yellow-500">{totalScore}</div>
+      </div>
+    </>
+  );
+};
+
+const WordInput = ({
+  letters,
+  message,
+  onSubmit,
+}: {
+  letters: string[];
+  message: Message | null;
+  onSubmit: (word: string) => Promise<void>;
+}) => {
+  const mainLetter = letters[0];
+  const [otherLetters, setOtherLetters] = useState(letters.slice(1));
+  const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
+
+  const LetterButton = useCallback(
+    ({ letter, className }: { letter: string; className?: string }) => {
+      return (
+        <HexagonButton
+          disabled={!!message}
+          className={className}
+          onClick={() => {
+            setSelectedLetters((prev) => [...prev, letter]);
+          }}
+        >
+          {letter}
+        </HexagonButton>
+      );
+    },
+    [message]
+  );
+
+  const shuffleLetters = () => {
+    setOtherLetters((prev) => [...prev].sort(() => Math.random() - 0.5));
+  };
+
+  const deleteLetter = () => {
+    setSelectedLetters((prev) => prev.slice(0, -1));
+  };
+
+  const handleSubmit = async () => {
+    await onSubmit(selectedLetters.join(""));
+    setSelectedLetters([]);
+  };
+
+  return (
+    <>
+      <div className="relative w-64 h-10 flex justify-center items-start mx-auto text-center">
+        <div className="uppercase text-white text-2xl font-semibold select-none">
+          {selectedLetters.join("")}
+        </div>
+        {!!message && (
+          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
+            <div className={cn("text-center", message.className)}>
+              {message.text}
+              {message.score && <span> +{message.score}</span>}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="mb-6 flex flex-nowrap justify-center items-center">
+        <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+          <LetterButton letter={otherLetters[0]} />
+          <LetterButton letter={otherLetters[1]} />
+        </div>
+        <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+          <LetterButton letter={otherLetters[2]} />
+          <LetterButton letter={mainLetter} className="bg-yellow-400" />
+          <LetterButton letter={otherLetters[3]} />
+        </div>
+        <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+          <LetterButton letter={otherLetters[4]} />
+          <LetterButton letter={otherLetters[5]} />
+        </div>
+      </div>
+      <div className="flex justify-center items-center gap-3">
+        <RoundButton onClick={deleteLetter} disabled={!!message}>
+          Löschen
+        </RoundButton>
+        <RoundButton onClick={shuffleLetters} disabled={!!message}>
+          Zufall
+        </RoundButton>
+        <RoundButton onClick={handleSubmit} disabled={!!message}>
+          Prüfen
+        </RoundButton>
+      </div>
+    </>
+  );
+};
+
+const HexagonButton = (props: ComponentProps<"button">) => {
   return (
     <button
       {...props}
@@ -201,16 +239,20 @@ const LetterButton = (props: ComponentProps<"button">) => {
       style={{
         clipPath:
           "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
+        ...props.style,
       }}
     />
   );
 };
 
-const Button = (props: ComponentProps<"button">) => {
+const RoundButton = (props: ComponentProps<"button">) => {
   return (
     <button
       {...props}
-      className="bg-gray-700 rounded-full py-1 px-3 text-white"
+      className={cn(
+        "bg-gray-800 rounded-full py-1 px-3 text-white",
+        props.className
+      )}
     />
   );
 };

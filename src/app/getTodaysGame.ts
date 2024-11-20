@@ -1,29 +1,10 @@
+"use server";
+
 import fs from "fs";
 import dayjs from "dayjs";
+import { isMainWord, getLettersFromWord, isPossibleWord } from "./utils";
 
-const getLettersFromWord = (word: string) => {
-  if (!word) {
-    return [];
-  }
-  return [...new Set(word.split("")).values()];
-};
-
-const isMainWord = (word: string) => {
-  return getLettersFromWord(word).length === 7;
-};
-
-const isPossibleWord = (
-  word: string,
-  mainLetter: string,
-  letters: string[]
-) => {
-  return (
-    word.includes(mainLetter) &&
-    getLettersFromWord(word).every((letter) => letters.includes(letter))
-  );
-};
-
-export const getTodaysGame = () => {
+export const getTodaysGame = async () => {
   const wordsFileContent = fs.readFileSync("./src/app/data/game-words.txt");
   const words = wordsFileContent.toString().split("\n");
   const mainWords = words.filter((word) => isMainWord(word));
