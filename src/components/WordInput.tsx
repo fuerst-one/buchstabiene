@@ -81,7 +81,7 @@ export const WordInput = ({
           </span>
         </div>
         {!!message && (
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
+          <div className="absolute -bottom-4 left-0 w-full">
             <div className={cn("text-center", message.className)}>
               {message.text}
               {message.score && <span> +{message.score}</span>}

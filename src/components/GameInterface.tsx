@@ -54,13 +54,16 @@ export const GameInterface = ({
       return;
     }
     if (word.length < 4) {
-      return await flashMessage("short");
+      return await flashMessage("tooShort");
+    }
+    if (!word.includes(letters[0])) {
+      return await flashMessage("centerMissing");
     }
     if (foundWords.includes(word)) {
       return await flashMessage("duplicate");
     }
     if (!possibleWords.includes(word)) {
-      return await flashMessage("error");
+      return await flashMessage("notInWordList");
     }
     const newFoundWords = [...foundWords, word];
     setFoundWords(newFoundWords);
