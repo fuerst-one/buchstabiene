@@ -16,7 +16,7 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] }) => {
         <div className="text-white px-1 text-ellipsis">
           {foundWords.toReversed().slice(0, 5).map(capitalize).join(", ")}
           <span className="text-white/50">
-            {foundWords.length > 5 ? "... " : ""}({foundWords.length})
+            {foundWords.length > 5 ? "..." : ""} ({foundWords.length})
           </span>
         </div>
         <ChevronDown
