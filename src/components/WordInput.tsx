@@ -37,15 +37,19 @@ export const WordInput = ({
   useWindowEventListener(
     "keydown",
     (event) => {
-      if (letters.includes(event.key)) {
+      if (message) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      if (letters.includes(key)) {
         addLetter(event.key);
-      } else if (event.key === "Backspace") {
+      } else if (key === "backspace") {
         if (event.ctrlKey || event.altKey) {
           setSelectedLetters([]);
         } else {
           deleteLetter();
         }
-      } else if (event.key === "Enter") {
+      } else if (key === "enter") {
         handleSubmit();
       }
     },
