@@ -17,10 +17,12 @@ export const GameInterface = ({
   id,
   letters,
   possibleWords,
+  maxScore,
 }: {
   id: string;
   letters: string[];
   possibleWords: string[];
+  maxScore: number;
 }) => {
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
@@ -53,9 +55,11 @@ export const GameInterface = ({
     }
     if (word.length < 4) {
       return await flashMessage("short");
-    } else if (foundWords.includes(word)) {
+    }
+    if (foundWords.includes(word)) {
       return await flashMessage("duplicate");
-    } else if (!possibleWords.includes(word)) {
+    }
+    if (!possibleWords.includes(word)) {
       return await flashMessage("error");
     }
     const newFoundWords = [...foundWords, word];
@@ -70,14 +74,13 @@ export const GameInterface = ({
     const wordScore = getWordScore(word);
     if (isPangram(word)) {
       return await flashMessage("pangram", wordScore);
-    } else {
-      return await flashMessage("correct", wordScore);
     }
+    return await flashMessage("correct", wordScore);
   };
 
   return (
     <div className="max-w-xl flex flex-col gap-4">
-      <Stage foundWords={foundWords} possibleWords={possibleWords} />
+      <Stage foundWords={foundWords} maxScore={maxScore} />
       <FoundWords foundWords={foundWords} />
       <WordInput letters={letters} message={message} onSubmit={submitWord} />
     </div>

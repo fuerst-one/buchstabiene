@@ -1,26 +1,31 @@
 "use server";
 import fs from "fs";
 import dayjs from "dayjs";
-import { isMainWord, getLettersFromWord, isPossibleWord } from "./utils";
+import { isPossibleWord, getMaxScore } from "./utils";
 import { btoa } from "buffer";
 
-export const getTodaysGame = async () => {
-  const wordsFileContent = fs.readFileSync("./src/app/data/game-words.txt");
+export type Game = {
+  id: string;
+  letters: string[];
+  possibleWords: string[];
+  maxScore: number;
+};
+
+export const getTodaysGame = async (): Promise<Game> => {
+  const wordsFileContent = fs.readFileSync("./src/data/words.txt");
   const words = wordsFileContent.toString().split("\n");
 
-  const mainWords = words.filter((word) => isMainWord(word));
+  const letterSetsContent = fs.readFileSync("./src/data/letter-sets.txt");
+  const letterSets = letterSetsContent.toString().split("\n");
 
   const timestamp = Math.floor(dayjs().startOf("day").valueOf() / 1000);
-  const todayIndex = timestamp % mainWords.length;
-  const mainWord = mainWords[todayIndex];
+  const todayIndex = timestamp % letterSets.length;
+  const letterSet = letterSets[todayIndex];
 
-  const id = btoa(mainWord + timestamp);
+  const id = btoa(letterSet + timestamp);
+  const letters = letterSet.split("");
+  const possibleWords = words.filter((word) => isPossibleWord(word, letters));
+  const maxScore = getMaxScore(possibleWords);
 
-  const letters = getLettersFromWord(mainWord).sort(() => Math.random() - 0.5);
-  const mainLetter = letters[0];
-
-  const possibleWords = words.filter((word) =>
-    isPossibleWord(word, mainLetter, letters)
-  );
-  return { id, letters, possibleWords };
+  return { id, letters, possibleWords, maxScore };
 };

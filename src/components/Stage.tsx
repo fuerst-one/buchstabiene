@@ -17,16 +17,12 @@ const stagesByPercentage = [
 
 export const Stage = ({
   foundWords,
-  possibleWords,
+  maxScore,
 }: {
   foundWords: string[];
-  possibleWords: string[];
+  maxScore: number;
 }) => {
   const [showDetailedScore, setShowDetailedScore] = useState(false);
-
-  const maxScore = possibleWords
-    .filter((word) => word.length <= 7)
-    .reduce((acc, word) => acc + getWordScore(word), 0);
 
   const currentScore = foundWords.reduce(
     (acc, word) => acc + getWordScore(word),

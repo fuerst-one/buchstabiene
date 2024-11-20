@@ -5,33 +5,17 @@ export const getLettersFromWord = (word: string) => {
   return [...new Set(word.split("")).values()];
 };
 
-const restrictedLetters = "enisrt".split("");
-const isRestrictedWord = (letters: string[]) => {
-  return (
-    restrictedLetters.filter((letter) => letters.includes(letter)).length >= 2
-  );
-};
-
-export const isMainWord = (word: string) => {
-  const letters = getLettersFromWord(word);
-  if (letters.length < 7) {
+export const isPossibleWord = (word: string, letters: string[]) => {
+  if (!word.includes(letters[0])) {
     return false;
   }
-  if (isRestrictedWord(letters)) {
-    return false;
+  const wordLetters = getLettersFromWord(word);
+  for (const wordLetter of wordLetters) {
+    if (!letters.includes(wordLetter)) {
+      return false;
+    }
   }
   return true;
-};
-
-export const isPossibleWord = (
-  word: string,
-  mainLetter: string,
-  letters: string[]
-) => {
-  return (
-    word.includes(mainLetter) &&
-    getLettersFromWord(word).every((letter) => letters.includes(letter))
-  );
 };
 
 export const isPangram = (word: string) => {
@@ -46,4 +30,10 @@ export const getWordScore = (word: string) => {
     return word.length + 7;
   }
   return word.length;
+};
+
+export const getMaxScore = (possibleWords: string[]) => {
+  return possibleWords
+    .filter((word) => word.length <= 7)
+    .reduce((acc, word) => acc + getWordScore(word), 0);
 };

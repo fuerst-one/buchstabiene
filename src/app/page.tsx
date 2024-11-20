@@ -2,7 +2,7 @@ import { GameInterface } from "../components/GameInterface";
 import { getTodaysGame } from "./getTodaysGame";
 
 export default async function Home() {
-  const { id, letters, possibleWords } = await getTodaysGame();
+  const { id, letters, possibleWords, maxScore } = await getTodaysGame();
   const todaysTitle = "buchstabiene"
     .split("")
     .map((letter) => (letters.includes(letter) ? "_" : letter))
@@ -18,6 +18,7 @@ export default async function Home() {
           id={id}
           letters={letters}
           possibleWords={possibleWords}
+          maxScore={maxScore}
         />
       </div>
     </div>
