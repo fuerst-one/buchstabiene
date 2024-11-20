@@ -1,6 +1,7 @@
 "use client";
 import { getWordScore } from "@/app/utils";
 import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
 import { useState } from "react";
 
 const stagesByPercentage = [
@@ -46,9 +47,19 @@ export const Stage = ({
       onClick={() => setShowDetailedScore((prev) => !prev)}
     >
       <div className="flex items-center gap-10">
-        <div className="font-semibold">{currentStage?.label}</div>
+        <div
+          className={cn("font-semibold flex items-center gap-1", {
+            "text-yellow-500 font-semibold":
+              currentStageIndex >= stagesByScore.length - 2,
+          })}
+        >
+          {currentStageIndex >= stagesByScore.length - 2 && (
+            <Star className="h-4 w-4" />
+          )}
+          {currentStage?.label}
+        </div>
         <div className="flex flex-grow items-center justify-between h-px bg-white/20">
-          {stagesByScore.map((stage, idx) => (
+          {stagesByScore.slice(1).map((stage, idx) => (
             <div
               key={stage.label}
               className={cn(
@@ -64,12 +75,21 @@ export const Stage = ({
       </div>
       {showDetailedScore && (
         <div className="bg-white/10 rounded-sm py-1 px-2 overflow-y-auto my-1">
-          {stagesByScore.toReversed().map(({ score, label }) => (
-            <div key={label} className="flex justify-between items-center">
-              <span>{label}</span>
-              <span>{score}</span>
-            </div>
-          ))}
+          {stagesByScore
+            .toReversed()
+            .slice(1)
+            .map(({ score, label }, idx) => (
+              <div
+                key={label}
+                className={cn("flex justify-between items-center", {
+                  "text-yellow-500 font-semibold":
+                    stagesByScore.length - currentStageIndex - 2 <= idx,
+                })}
+              >
+                <span>{label}</span>
+                <span>{score}</span>
+              </div>
+            ))}
         </div>
       )}
     </div>
