@@ -5,10 +5,10 @@ import { useState } from "react";
 
 const stagesByPercentage = [
   { percentage: 0, label: "Anfänger" },
-  { percentage: 1, label: "Guter Start" },
-  { percentage: 2, label: "Solide" },
-  { percentage: 5, label: "Nett" },
-  { percentage: 10, label: "Gut" },
+  { percentage: 5, label: "Guter Start" },
+  { percentage: 10, label: "Solide" },
+  { percentage: 15, label: "Nett" },
+  { percentage: 20, label: "Gut" },
   { percentage: 25, label: "Stark" },
   { percentage: 50, label: "Unglaublich" },
   { percentage: 75, label: "Genie" },
