@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useState, useCallback, ComponentProps } from "react";
+import { useState, useCallback, ComponentProps, useEffect } from "react";
 import { Message } from "./utils";
 
 export const WordInput = ({
@@ -16,38 +16,63 @@ export const WordInput = ({
   const [otherLetters, setOtherLetters] = useState(letters.slice(1));
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
 
+  const addLetter = useCallback((letter: string) => {
+    setSelectedLetters((prev) => [...prev, letter]);
+  }, []);
+
+  const shuffleLetters = useCallback(() => {
+    setOtherLetters((prev) => [...prev].sort(() => Math.random() - 0.5));
+  }, []);
+
+  const deleteLetter = useCallback(() => {
+    setSelectedLetters((prev) => prev.slice(0, -1));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
+    console.log("word:", selectedLetters.join(""));
+    await onSubmit(selectedLetters.join(""));
+    setSelectedLetters([]);
+  }, [selectedLetters]);
+
+  useEffect(() => {
+    if (!window) {
+      return;
+    }
+    const onKeydown = (event: KeyboardEvent) => {
+      console.log(event.key);
+      if (letters.includes(event.key)) {
+        addLetter(event.key);
+      }
+      if (event.key === "Backspace") {
+        deleteLetter();
+      }
+      if (event.key === "Enter") {
+        handleSubmit();
+      }
+    };
+    window.addEventListener("keydown", onKeydown);
+    return () => {
+      window.removeEventListener("keydown", onKeydown);
+    };
+  }, [window, addLetter, deleteLetter, handleSubmit]);
+
   const LetterButton = useCallback(
     ({ letter, className }: { letter: string; className?: string }) => {
       return (
         <HexagonButton
           disabled={!!message}
           className={className}
-          onClick={() => {
-            setSelectedLetters((prev) => [...prev, letter]);
-          }}
+          onClick={() => addLetter(letter)}
         >
           {letter}
         </HexagonButton>
       );
     },
-    [message]
+    [message, addLetter]
   );
 
-  const shuffleLetters = () => {
-    setOtherLetters((prev) => [...prev].sort(() => Math.random() - 0.5));
-  };
-
-  const deleteLetter = () => {
-    setSelectedLetters((prev) => prev.slice(0, -1));
-  };
-
-  const handleSubmit = async () => {
-    await onSubmit(selectedLetters.join(""));
-    setSelectedLetters([]);
-  };
-
   return (
-    <>
+    <div className="flex flex-col gap-6 mt-6">
       <div className="relative w-64 max-w-full h-10 flex justify-center items-start mx-auto text-center">
         <div className="bg-white/5 w-full rounded-sm uppercase text-white text-2xl font-semibold select-none">
           {selectedLetters.join("")}
@@ -93,7 +118,7 @@ export const WordInput = ({
           Prüfen
         </RoundButton>
       </div>
-    </>
+    </div>
   );
 };
 
