@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useState, useCallback, ComponentProps, useEffect } from "react";
+import { useState, useCallback, ComponentProps } from "react";
 import { Message } from "./utils";
 import { useWindowEventListener } from "@/lib/useWindowEventListener";
 
@@ -30,10 +30,9 @@ export const WordInput = ({
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    console.log("word:", selectedLetters.join(""));
     await onSubmit(selectedLetters.join(""));
     setSelectedLetters([]);
-  }, [selectedLetters]);
+  }, [selectedLetters, onSubmit]);
 
   useWindowEventListener(
     "keydown",
