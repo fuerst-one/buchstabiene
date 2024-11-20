@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import { useState, useCallback, ComponentProps, useEffect } from "react";
 import { Message } from "./utils";
+import { useWindowEventListener } from "@/lib/useWindowEventListener";
 
 export const WordInput = ({
   letters,
@@ -34,27 +35,23 @@ export const WordInput = ({
     setSelectedLetters([]);
   }, [selectedLetters]);
 
-  useEffect(() => {
-    if (!window) {
-      return;
-    }
-    const onKeydown = (event: KeyboardEvent) => {
-      console.log(event.key);
+  useWindowEventListener(
+    "keydown",
+    (event) => {
       if (letters.includes(event.key)) {
         addLetter(event.key);
-      }
-      if (event.key === "Backspace") {
-        deleteLetter();
-      }
-      if (event.key === "Enter") {
+      } else if (event.key === "Backspace") {
+        if (event.ctrlKey || event.altKey) {
+          setSelectedLetters([]);
+        } else {
+          deleteLetter();
+        }
+      } else if (event.key === "Enter") {
         handleSubmit();
       }
-    };
-    window.addEventListener("keydown", onKeydown);
-    return () => {
-      window.removeEventListener("keydown", onKeydown);
-    };
-  }, [window, addLetter, deleteLetter, handleSubmit]);
+    },
+    [addLetter, deleteLetter, handleSubmit]
+  );
 
   const LetterButton = useCallback(
     ({ letter, className }: { letter: string; className?: string }) => {
