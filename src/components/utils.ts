@@ -11,7 +11,7 @@ export type Message = { className: string; text: string; score?: number };
 export const messages: Record<MessageType, Message> = {
   tooShort: { className: "text-red-500", text: "Zu kurz" },
   centerMissing: { className: "text-red-500", text: "Hauptbuchstabe fehlt" },
-  notInWordList: { className: "text-red-500", text: "Kein valides Wort" },
+  notInWordList: { className: "text-red-500", text: "Kein gesuchtes Wort" },
   duplicate: { className: "text-red-500", text: "Schon gefunden" },
   correct: { className: "text-green-500", text: "Toll!" },
   pangram: {
