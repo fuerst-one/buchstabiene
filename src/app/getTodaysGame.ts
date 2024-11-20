@@ -2,7 +2,12 @@
 
 import fs from "fs";
 import dayjs from "dayjs";
-import { isMainWord, getLettersFromWord, isPossibleWord } from "./utils";
+import {
+  isMainWord,
+  getLettersFromWord,
+  isPossibleWord,
+  getWordScore,
+} from "./utils";
 
 export const getTodaysGame = async () => {
   const wordsFileContent = fs.readFileSync("./src/app/data/game-words.txt");
@@ -16,5 +21,9 @@ export const getTodaysGame = async () => {
   const possibleWords = words.filter((word) =>
     isPossibleWord(word, mainLetter, letters)
   );
-  return { letters, possibleWords, timestamp };
+  const maxScore = possibleWords.reduce(
+    (acc, word) => acc + getWordScore(word),
+    0
+  );
+  return { timestamp, letters, possibleWords, maxScore };
 };
