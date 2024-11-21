@@ -1,48 +1,37 @@
 import dayjs from "@/dayjs";
-import { Button } from "@/components/ui/button";
-import { useServerAuth } from "@/zustand/useServerAuth";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
+import { Calendar } from "@/components/ui/calendar";
+import { getPlayedGames } from "@/server/api/game";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const user = (await useServerAuth.getState().getSession())?.user;
+  const playedGames = await getPlayedGames();
 
   return (
-    <div className="mt-12 flex items-center justify-center">
-      <div className="container max-w-lg">
-        <h1 className="mb-6 w-full text-center text-2xl font-bold">
-          BuchstaBiene
-        </h1>
-        {user && (
-          <div className="mb-6 w-full text-center text-sm">
-            <p>Eingeloggt als &quot;{user.name}&quot;</p>
-          </div>
-        )}
-        <div className="flex flex-col items-center justify-center gap-4">
-          <Link href="/spielen/heute">
-            <Button variant="outline" size="lg">
-              Heutiges Spiel
-            </Button>
-          </Link>
-          <div className="mt-4 flex flex-col items-center justify-center gap-2">
-            <h2 className="text-lg font-bold">Letzte Spiele</h2>
-            {Array.from({ length: 10 }).map((_, index) => (
-              <Link
-                key={index}
-                href={`/spielen/${dayjs()
+    <div className="container flex h-full items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <Link href="/spielen/heute">
+          <Button variant="default" size="lg">
+            Heutiges Spiel
+          </Button>
+        </Link>
+        <div className="mt-4 flex flex-col items-center justify-center gap-2">
+          <h2 className="text-lg font-bold">Letzte Spiele</h2>
+          <Calendar
+            selected={playedGames.map((date) =>
+              dayjs(date.timestamp, DateFormat.date).toDate(),
+            )}
+            onDayClick={async (date) => {
+              "use server";
+              redirect(
+                `/spielen/${dayjs(date, DateFormat.date)
                   .tz(TimezoneDefault)
-                  .subtract(index, "day")
-                  .format(DateFormat.date)}`}
-              >
-                <Button variant="outline">
-                  {dayjs()
-                    .tz(TimezoneDefault)
-                    .subtract(index, "day")
-                    .format(DateFormat.date)}
-                </Button>
-              </Link>
-            ))}
-          </div>
+                  .format(DateFormat.date)}`,
+              );
+            }}
+          />
         </div>
       </div>
     </div>

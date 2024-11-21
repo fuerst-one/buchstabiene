@@ -1,7 +1,5 @@
 "use server";
 import dayjs from "@/dayjs";
-import { btoa } from "buffer";
-import { getMaxScore, isPossibleWord } from "@/lib/game";
 import { savedGames } from "../db/schema";
 import { db } from "../db/db";
 import { NoSessionError } from "@/lib/errors";
@@ -9,6 +7,7 @@ import { useServerAuth } from "@/zustand/useServerAuth";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { readWordFile } from "@/lib/readWordFile";
 import { join } from "path";
+import { isPossibleWord, getMaxScore } from "@/components/Game/utils";
 
 export type Game = {
   gameId: string;
@@ -18,6 +17,28 @@ export type Game = {
 };
 
 const gameDataDir = join(process.cwd(), "src/app/_data");
+
+const getGameIdFromData = ({
+  letterSet,
+  date,
+}: {
+  letterSet: string;
+  date: string;
+}) => {
+  const timestamp = Math.floor(
+    dayjs(date, DateFormat.date).tz(TimezoneDefault).startOf("day").valueOf() /
+      1000,
+  );
+  return Buffer.from(letterSet + timestamp).toString("base64");
+};
+const getDataFromGameId = (gameId: string) => {
+  const decoded = Buffer.from(gameId, "base64").toString("utf-8");
+  const letterSet = decoded.slice(0, 7);
+  const timestamp = dayjs(Number(decoded.slice(7)) * 1000)
+    .tz(TimezoneDefault)
+    .format(DateFormat.date);
+  return { letterSet, timestamp };
+};
 
 export const getGameByDate = async (date: string): Promise<Game> => {
   const words = await readWordFile(join(gameDataDir, "words.txt"));
@@ -31,7 +52,7 @@ export const getGameByDate = async (date: string): Promise<Game> => {
   const todayIndex = timestamp % letterSets.length;
   const letterSet = letterSets[todayIndex];
 
-  const gameId = btoa(letterSet + timestamp);
+  const gameId = getGameIdFromData({ letterSet, date });
   const letters = letterSet.split("");
   const possibleWords = words.filter((word) => isPossibleWord(word, letters));
   const maxScore = getMaxScore(possibleWords);
@@ -74,4 +95,19 @@ export const getSavedGame = async (gameId: string) => {
   });
 
   return savedGame ?? null;
+};
+
+export const getPlayedGames = async () => {
+  const session = await useServerAuth.getState().getSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return [];
+  }
+
+  const savedGames = await db.query.savedGames.findMany({
+    where: (savedGames, { eq }) => eq(savedGames.userId, userId),
+  });
+
+  return savedGames.map((game) => getDataFromGameId(game.gameId));
 };

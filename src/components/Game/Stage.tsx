@@ -1,5 +1,5 @@
 "use client";
-import { getWordScore } from "@/app/utils";
+import { getWordScore } from "./utils";
 import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 import { useState } from "react";
@@ -43,7 +43,7 @@ export const Stage = ({
 
   return (
     <div
-      className="overflow-y-auto rounded-sm bg-white/10 px-2 py-1"
+      className="max-w-full overflow-y-auto rounded-sm bg-white/10 px-2 py-1"
       onClick={() => setShowDetailedScore((prev) => !prev)}
     >
       <div className="flex items-center gap-10">

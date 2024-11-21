@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { isPangram, getWordScore } from "../app/utils";
+import { isPangram, getWordScore } from "./utils";
 import { WordInput } from "./WordInput";
 import { FoundWords } from "./FoundWords";
 import { Stage } from "./Stage";
