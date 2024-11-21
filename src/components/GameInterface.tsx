@@ -1,43 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { isPangram, getWordScore } from "../app/utils";
 import { WordInput } from "./WordInput";
 import { FoundWords } from "./FoundWords";
 import { Stage } from "./Stage";
 import { Message, MessageType, messages } from "./utils";
 
-const LOCAL_STORAGE_KEY = "spelling-bee-save-state";
-
-type SaveState = {
-  id: string;
-  foundWords: string[];
-};
-
 export const GameInterface = ({
-  id,
   letters,
   possibleWords,
   maxScore,
+  foundWords = [],
+  onChangeFoundWords,
 }: {
-  id: string;
   letters: string[];
   possibleWords: string[];
   maxScore: number;
+  foundWords: string[];
+  onChangeFoundWords: (foundWords: string[]) => void;
 }) => {
-  const [foundWords, setFoundWords] = useState<string[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
-
-  useEffect(() => {
-    const savedStateContent = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!savedStateContent) {
-      return;
-    }
-    const savedState = JSON.parse(savedStateContent) as SaveState;
-    if (savedState.id !== id) {
-      return;
-    }
-    setFoundWords(savedState.foundWords);
-  }, [id]);
 
   const flashMessage = async (messageType: MessageType, score?: number) => {
     return new Promise<void>((resolve) => {
@@ -66,14 +48,7 @@ export const GameInterface = ({
       return await flashMessage("notInWordList");
     }
     const newFoundWords = [...foundWords, word];
-    setFoundWords(newFoundWords);
-    localStorage.setItem(
-      LOCAL_STORAGE_KEY,
-      JSON.stringify({
-        id,
-        foundWords: newFoundWords,
-      })
-    );
+    onChangeFoundWords(newFoundWords);
     const wordScore = getWordScore(word);
     if (isPangram(word)) {
       return await flashMessage("pangram", wordScore);

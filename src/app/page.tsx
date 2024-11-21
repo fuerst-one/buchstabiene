@@ -1,25 +1,49 @@
-import { GameInterface } from "../components/GameInterface";
-import { getTodaysGame } from "./getTodaysGame";
+import dayjs from "@/dayjs";
+import { Button } from "@/components/ui/button";
+import { useServerAuth } from "@/zustand/useServerAuth";
+import Link from "next/link";
+import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 
 export default async function Home() {
-  const { id, letters, possibleWords, maxScore } = await getTodaysGame();
-  const todaysTitle = "buchstabiene"
-    .split("")
-    .map((letter) => (letters.includes(letter) ? "_" : letter))
-    .join("");
+  const user = (await useServerAuth.getState().getSession())?.user;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-foreground text-background">
+    <div className="mt-12 flex items-center justify-center">
       <div className="container max-w-lg">
-        <h1 className="text-xl font-bold text-center w-full mb-6">
-          {todaysTitle}
+        <h1 className="text-2xl font-bold text-center w-full mb-6">
+          BuchstaBiene
         </h1>
-        <GameInterface
-          id={id}
-          letters={letters}
-          possibleWords={possibleWords}
-          maxScore={maxScore}
-        />
+        {user && (
+          <div className="text-sm text-center w-full mb-6">
+            <p>Eingeloggt als &quot;{user.name}&quot;</p>
+          </div>
+        )}
+        <div className="flex flex-col justify-center items-center gap-4">
+          <Link href="/spielen/heute">
+            <Button variant="outline" size="lg">
+              Heutiges Spiel
+            </Button>
+          </Link>
+          <div className="flex flex-col justify-center items-center gap-2 mt-4">
+            <h2 className="text-lg font-bold">Letzte Spiele</h2>
+            {Array.from({ length: 10 }).map((_, index) => (
+              <Link
+                key={index}
+                href={`/spielen/${dayjs()
+                  .tz(TimezoneDefault)
+                  .subtract(index, "day")
+                  .format(DateFormat.date)}`}
+              >
+                <Button variant="outline">
+                  {dayjs()
+                    .tz(TimezoneDefault)
+                    .subtract(index, "day")
+                    .format(DateFormat.date)}
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
