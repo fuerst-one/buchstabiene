@@ -58,7 +58,7 @@ export const Game = ({
         JSON.stringify({
           gameId,
           foundWords,
-        })
+        }),
       );
     }
   };

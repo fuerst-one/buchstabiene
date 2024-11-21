@@ -10,21 +10,21 @@ export default async function Home() {
   return (
     <div className="mt-12 flex items-center justify-center">
       <div className="container max-w-lg">
-        <h1 className="text-2xl font-bold text-center w-full mb-6">
+        <h1 className="mb-6 w-full text-center text-2xl font-bold">
           BuchstaBiene
         </h1>
         {user && (
-          <div className="text-sm text-center w-full mb-6">
+          <div className="mb-6 w-full text-center text-sm">
             <p>Eingeloggt als &quot;{user.name}&quot;</p>
           </div>
         )}
-        <div className="flex flex-col justify-center items-center gap-4">
+        <div className="flex flex-col items-center justify-center gap-4">
           <Link href="/spielen/heute">
             <Button variant="outline" size="lg">
               Heutiges Spiel
             </Button>
           </Link>
-          <div className="flex flex-col justify-center items-center gap-2 mt-4">
+          <div className="mt-4 flex flex-col items-center justify-center gap-2">
             <h2 className="text-lg font-bold">Letzte Spiele</h2>
             {Array.from({ length: 10 }).map((_, index) => (
               <Link

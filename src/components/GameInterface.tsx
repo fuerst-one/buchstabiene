@@ -21,7 +21,7 @@ export const GameInterface = ({
 }) => {
   const [message, setMessage] = useState<Message | null>(null);
   const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(
-    null
+    null,
   );
 
   const flashMessage = async (messageType: MessageType, score?: number) => {
@@ -71,7 +71,7 @@ export const GameInterface = ({
   };
 
   return (
-    <div className="max-w-xl flex flex-col gap-4">
+    <div className="flex max-w-xl flex-col gap-4 px-2">
       <Stage foundWords={foundWords} maxScore={maxScore} />
       <FoundWords foundWords={foundWords} />
       <WordInput

@@ -27,7 +27,7 @@ export const Stage = ({
 
   const currentScore = foundWords.reduce(
     (acc, word) => acc + getWordScore(word),
-    0
+    0,
   );
   const currentPercentage = currentScore / maxScore;
   const stagesByScore = stagesByPercentage.map(({ percentage, label }) => ({
@@ -43,13 +43,13 @@ export const Stage = ({
 
   return (
     <div
-      className="bg-white/10 rounded-sm py-1 px-2 overflow-y-auto"
+      className="overflow-y-auto rounded-sm bg-white/10 px-2 py-1"
       onClick={() => setShowDetailedScore((prev) => !prev)}
     >
       <div className="flex items-center gap-10">
         <div
-          className={cn("font-semibold flex items-center gap-1", {
-            "text-yellow-500 font-semibold":
+          className={cn("flex items-center gap-1 font-semibold", {
+            "font-semibold text-yellow-500":
               currentStageIndex >= stagesByScore.length - 2,
           })}
         >
@@ -58,31 +58,31 @@ export const Stage = ({
           )}
           {currentStage?.label}
         </div>
-        <div className="flex flex-grow items-center justify-between h-px bg-white/20">
+        <div className="flex h-px flex-grow items-center justify-between bg-white/20">
           {stagesByScore.slice(1).map((stage, idx) => (
             <div
               key={stage.label}
               className={cn(
                 "h-3 w-3 rounded-full",
-                currentStageIndex >= idx ? "bg-yellow-500" : "bg-white"
+                currentStageIndex >= idx ? "bg-yellow-500" : "bg-white",
               )}
             />
           ))}
         </div>
-        <div className="mr-0 ml-auto text-yellow-500 font-semibold">
+        <div className="ml-auto mr-0 font-semibold text-yellow-500">
           {currentScore} ({Math.round(currentPercentage * 100)}%)
         </div>
       </div>
       {showDetailedScore && (
-        <div className="bg-white/10 rounded-sm py-1 px-2 overflow-y-auto my-1">
+        <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 py-1">
           {stagesByScore
             .toReversed()
             .slice(1)
             .map(({ score, label }, idx) => (
               <div
                 key={label}
-                className={cn("flex justify-between items-center", {
-                  "text-yellow-500 font-semibold":
+                className={cn("flex items-center justify-between", {
+                  "font-semibold text-yellow-500":
                     stagesByScore.length - currentStageIndex - 2 <= idx,
                 })}
               >

@@ -43,15 +43,15 @@ export default async function GameByDate({
   return (
     <div className="mt-12 flex items-center justify-center">
       <div className="container max-w-lg">
-        <h1 className="text-2xl font-bold text-center w-full mb-6">
+        <h1 className="mb-6 w-full text-center text-2xl font-bold">
           {todaysTitle} <br />
         </h1>
         {user && (
-          <div className="text-sm text-center w-full mb-6">
+          <div className="mb-6 w-full text-center text-sm">
             <p>Eingeloggt als &quot;{user.name}&quot;</p>
           </div>
         )}
-        <p className="text-sm text-center w-full mb-6">{date}</p>
+        <p className="mb-6 w-full text-center text-sm">{date}</p>
         <Game user={user} {...game} />
       </div>
     </div>

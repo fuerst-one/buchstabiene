@@ -35,7 +35,7 @@ export default async function SignupPage() {
           action={async (formData) => {
             "use server";
             const formValues = await signUpSchema.parseAsync(
-              formDataToObject(formData)
+              formDataToObject(formData),
             );
             await signUp(formValues);
           }}

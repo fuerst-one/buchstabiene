@@ -51,7 +51,7 @@ export const accounts = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-  })
+  }),
 );
 
 export const sessions = pgTable("session", {
@@ -73,7 +73,7 @@ export const verificationTokens = pgTable(
     compositePk: primaryKey({
       columns: [verificationToken.identifier, verificationToken.token],
     }),
-  })
+  }),
 );
 
 export const authenticators = pgTable(
@@ -94,7 +94,7 @@ export const authenticators = pgTable(
     compositePK: primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
     }),
-  })
+  }),
 );
 
 export const savedGames = pgTable(
@@ -113,7 +113,7 @@ export const savedGames = pgTable(
     return {
       pk: primaryKey({ columns: [savedGames.userId, savedGames.gameId] }),
     };
-  }
+  },
 );
 export type SavedGame = typeof savedGames.$inferSelect;
 export type SavedGameInsert = typeof savedGames.$inferInsert;

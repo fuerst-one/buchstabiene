@@ -1,6 +1,6 @@
 export const fetchJSON = async <ReturnValue>(
   input: RequestInfo,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<ReturnValue> => {
   const response = await fetch(input, init);
   if (!response.ok) {

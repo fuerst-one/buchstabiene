@@ -9,27 +9,27 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] }) => {
 
   return (
     <div
-      className="bg-white/10 rounded-sm py-1 px-2 overflow-y-auto"
+      className="overflow-y-auto rounded-sm bg-white/10 px-2 py-1"
       onClick={() => setShowAllFoundWords((prev) => !prev)}
     >
       <div className="flex items-center justify-between">
-        <div className="text-white px-1 text-ellipsis">
+        <div className="text-ellipsis px-1 text-white">
           {foundWords.toReversed().slice(0, 5).map(capitalize).join(", ")}
           <span className="text-white/50">
             {foundWords.length > 5 ? "..." : ""} ({foundWords.length})
           </span>
         </div>
         <ChevronDown
-          className={cn("w-4 h-4", { "rotate-180": showAllFoundWords })}
+          className={cn("h-4 w-4", { "rotate-180": showAllFoundWords })}
         />
       </div>
       {showAllFoundWords && (
-        <div className="bg-white/10 rounded-sm py-1 px-2 overflow-y-auto my-1">
+        <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 py-1">
           <div className="columns-2">
             {foundWords.toSorted().map((word) => (
               <div
                 key={word}
-                className={cn("text-white px-1 w-1/2 leading-7", {
+                className={cn("w-1/2 px-1 leading-7 text-white", {
                   "font-bold": isPangram(word),
                 })}
               >

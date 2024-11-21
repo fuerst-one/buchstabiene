@@ -25,7 +25,7 @@ export const getGameByDate = async (date: string): Promise<Game> => {
 
   const timestamp = Math.floor(
     dayjs(date, DateFormat.date).tz(TimezoneDefault).startOf("day").valueOf() /
-      1000
+      1000,
   );
 
   const todayIndex = timestamp % letterSets.length;

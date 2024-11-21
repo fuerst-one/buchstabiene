@@ -56,7 +56,7 @@ export const WordInput = ({
         handleSubmit();
       }
     },
-    [addLetter, deleteLetter, handleSubmit]
+    [addLetter, deleteLetter, handleSubmit],
   );
 
   const LetterButton = useCallback(
@@ -67,20 +67,18 @@ export const WordInput = ({
         </HexagonButton>
       );
     },
-    [addLetter]
+    [addLetter],
   );
 
   return (
-    <div className="flex flex-col gap-6 mt-6">
-      <div className="relative w-64 max-w-full h-10 flex justify-center items-start mx-auto text-center">
-        <div className="bg-white/5 w-full rounded-sm uppercase text-white text-2xl font-semibold select-none">
+    <div className="mt-6 flex flex-col gap-8">
+      <div className="relative mx-auto w-64 max-w-full">
+        <div className="flex h-12 w-full select-none items-center justify-center rounded-sm bg-white/5 text-center text-2xl font-semibold uppercase text-white">
           {selectedLetters.join("")}
-          <span className="text-yellow-500 animate-bounce relative -top-0.5">
-            |
-          </span>
+          <span className="relative -top-0.5 text-yellow-500">|</span>
         </div>
         {!!message && (
-          <div className="absolute -bottom-4 left-0 w-full">
+          <div className="absolute -bottom-6 left-0 w-full">
             <div className={cn("text-center", message.className)}>
               {message.text}
               {message.score && <span> +{message.score}</span>}
@@ -88,12 +86,12 @@ export const WordInput = ({
           </div>
         )}
       </div>
-      <div className="mb-6 flex flex-nowrap justify-center items-center">
-        <div className="flex flex-col justify-center items-center gap-[7px] -mx-[9px]">
+      <div className="flex flex-nowrap items-center justify-center">
+        <div className="-mx-[9px] flex flex-col items-center justify-center gap-[7px]">
           <LetterButton letter={otherLetters[0]} />
           <LetterButton letter={otherLetters[1]} />
         </div>
-        <div className="flex flex-col justify-center items-center gap-[7px] -mx-[9px]">
+        <div className="-mx-[9px] flex flex-col items-center justify-center gap-[7px]">
           <LetterButton letter={otherLetters[2]} />
           <LetterButton
             letter={mainLetter}
@@ -101,12 +99,12 @@ export const WordInput = ({
           />
           <LetterButton letter={otherLetters[3]} />
         </div>
-        <div className="flex flex-col justify-center items-center gap-[7px] -mx-[9px]">
+        <div className="-mx-[9px] flex flex-col items-center justify-center gap-[7px]">
           <LetterButton letter={otherLetters[4]} />
           <LetterButton letter={otherLetters[5]} />
         </div>
       </div>
-      <div className="flex justify-center items-center gap-3">
+      <div className="flex items-center justify-center gap-3">
         <RoundButton onClick={deleteLetter}>Löschen</RoundButton>
         <RoundButton onClick={shuffleLetters}>Zufall</RoundButton>
         <RoundButton onClick={handleSubmit}>Prüfen</RoundButton>
@@ -120,8 +118,8 @@ const HexagonButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "bg-white/20 text-2xl rounded-sm font-bold h-[5rem] w-[6rem] text-white uppercase",
-        props.className
+        "h-[5rem] w-[6rem] rounded-sm bg-white/20 text-2xl font-bold uppercase text-white",
+        props.className,
       )}
       style={{
         clipPath:
@@ -137,8 +135,8 @@ const RoundButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "border border-white/50 rounded-full py-1 px-3 text-white",
-        props.className
+        "rounded-full border border-white/50 px-3 py-1 text-white",
+        props.className,
       )}
     />
   );

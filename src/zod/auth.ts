@@ -10,7 +10,7 @@ export const usernameSchema = z
   .min(1, "Benutzername ist erforderlich")
   .regex(
     /^[a-zA-Z0-9\.\-\_]+$/,
-    "Nur Buchstaben, Zahlen, Punkte, Bindestriche und Unterstriche sind erlaubt"
+    "Nur Buchstaben, Zahlen, Punkte, Bindestriche und Unterstriche sind erlaubt",
   );
 
 export const passwordSchema = z

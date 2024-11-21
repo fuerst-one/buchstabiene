@@ -26,15 +26,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const { email, password } = await signInSchema.parseAsync(
-            credentials
-          );
+          const { email, password } =
+            await signInSchema.parseAsync(credentials);
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_PROTOCOL}${process.env.NEXT_PUBLIC_URL}/api/login`,
             {
               method: "POST",
               body: JSON.stringify({ email, password }),
-            }
+            },
           );
           const user = await response.json();
           return user;
