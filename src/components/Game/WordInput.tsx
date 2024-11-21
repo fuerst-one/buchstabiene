@@ -107,7 +107,7 @@ export const WordInput = ({
       <div className="flex items-center justify-center gap-3">
         <RoundButton onClick={deleteLetter}>Löschen</RoundButton>
         <RoundButton onClick={shuffleLetters}>Zufall</RoundButton>
-        <RoundButton onClick={handleSubmit}>Prüfen</RoundButton>
+        <RoundButton onClick={handleSubmit}>Eingabe</RoundButton>
       </div>
     </div>
   );
