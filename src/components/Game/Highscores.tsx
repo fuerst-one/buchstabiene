@@ -52,7 +52,8 @@ export const Highscores = ({
                 </span>
                 <span className="font-semibold">
                   {getStageByScore(highscore.score, maxScore).label} -{" "}
-                  {highscore.score} Wörter - {highscore.score} Punkte
+                  {highscore.foundWords.length} Wörter - {highscore.score}{" "}
+                  Punkte
                 </span>
               </div>
             ))}
