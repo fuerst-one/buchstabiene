@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 import { useState } from "react";
 
-const stagesByPercentage = [
+export const stagesByPercentage = [
   { percentage: 0, label: "Anfänger" },
   { percentage: 5, label: "Guter Start" },
   { percentage: 10, label: "Nett" },
