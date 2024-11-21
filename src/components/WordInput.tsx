@@ -8,10 +8,12 @@ export const WordInput = ({
   letters,
   message,
   onSubmit,
+  onCancelMessage,
 }: {
   letters: string[];
   message: Message | null;
   onSubmit: (word: string) => Promise<void>;
+  onCancelMessage: () => void;
 }) => {
   const mainLetter = letters[0];
   const [otherLetters, setOtherLetters] = useState(letters.slice(1));
@@ -38,7 +40,8 @@ export const WordInput = ({
     "keydown",
     (event) => {
       if (message) {
-        return;
+        onCancelMessage();
+        setSelectedLetters([]);
       }
       const key = event.key.toLowerCase();
       if (letters.includes(key)) {
@@ -59,16 +62,12 @@ export const WordInput = ({
   const LetterButton = useCallback(
     ({ letter, className }: { letter: string; className?: string }) => {
       return (
-        <HexagonButton
-          disabled={!!message}
-          className={className}
-          onClick={() => addLetter(letter)}
-        >
+        <HexagonButton className={className} onClick={() => addLetter(letter)}>
           {letter}
         </HexagonButton>
       );
     },
-    [message, addLetter]
+    [addLetter]
   );
 
   return (
@@ -90,11 +89,11 @@ export const WordInput = ({
         )}
       </div>
       <div className="mb-6 flex flex-nowrap justify-center items-center">
-        <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+        <div className="flex flex-col justify-center items-center gap-[7px] -mx-[9px]">
           <LetterButton letter={otherLetters[0]} />
           <LetterButton letter={otherLetters[1]} />
         </div>
-        <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+        <div className="flex flex-col justify-center items-center gap-[7px] -mx-[9px]">
           <LetterButton letter={otherLetters[2]} />
           <LetterButton
             letter={mainLetter}
@@ -102,21 +101,15 @@ export const WordInput = ({
           />
           <LetterButton letter={otherLetters[3]} />
         </div>
-        <div className="flex flex-col justify-center items-center gap-2 -mx-1.5">
+        <div className="flex flex-col justify-center items-center gap-[7px] -mx-[9px]">
           <LetterButton letter={otherLetters[4]} />
           <LetterButton letter={otherLetters[5]} />
         </div>
       </div>
       <div className="flex justify-center items-center gap-3">
-        <RoundButton onClick={deleteLetter} disabled={!!message}>
-          Löschen
-        </RoundButton>
-        <RoundButton onClick={shuffleLetters} disabled={!!message}>
-          Zufall
-        </RoundButton>
-        <RoundButton onClick={handleSubmit} disabled={!!message}>
-          Prüfen
-        </RoundButton>
+        <RoundButton onClick={deleteLetter}>Löschen</RoundButton>
+        <RoundButton onClick={shuffleLetters}>Zufall</RoundButton>
+        <RoundButton onClick={handleSubmit}>Prüfen</RoundButton>
       </div>
     </div>
   );
@@ -127,7 +120,7 @@ const HexagonButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "bg-white/20 text-xl rounded-sm font-bold h-[4rem] w-[4.75rem] text-white uppercase",
+        "bg-white/20 text-2xl rounded-sm font-bold h-[5rem] w-[6rem] text-white uppercase",
         props.className
       )}
       style={{

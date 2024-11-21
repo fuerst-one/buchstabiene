@@ -20,15 +20,29 @@ export const GameInterface = ({
   onChangeFoundWords: (foundWords: string[]) => void;
 }) => {
   const [message, setMessage] = useState<Message | null>(null);
+  const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   const flashMessage = async (messageType: MessageType, score?: number) => {
     return new Promise<void>((resolve) => {
       setMessage({ ...messages[messageType], score });
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setMessage(null);
+        setMessageTimeout(null);
         resolve();
       }, 1000);
+      setMessageTimeout(timeout);
     });
+  };
+
+  const cancelMessage = () => {
+    if (!messageTimeout) {
+      return;
+    }
+    clearTimeout(messageTimeout);
+    setMessageTimeout(null);
+    setMessage(null);
   };
 
   const submitWord = async (word: string) => {
@@ -60,7 +74,12 @@ export const GameInterface = ({
     <div className="max-w-xl flex flex-col gap-4">
       <Stage foundWords={foundWords} maxScore={maxScore} />
       <FoundWords foundWords={foundWords} />
-      <WordInput letters={letters} message={message} onSubmit={submitWord} />
+      <WordInput
+        letters={letters}
+        message={message}
+        onSubmit={submitWord}
+        onCancelMessage={cancelMessage}
+      />
     </div>
   );
 };

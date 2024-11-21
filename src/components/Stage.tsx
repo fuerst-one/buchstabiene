@@ -7,12 +7,12 @@ import { useState } from "react";
 const stagesByPercentage = [
   { percentage: 0, label: "Anfänger" },
   { percentage: 5, label: "Guter Start" },
-  { percentage: 10, label: "Solide" },
-  { percentage: 15, label: "Nett" },
+  { percentage: 10, label: "Nett" },
+  { percentage: 15, label: "Solide" },
   { percentage: 20, label: "Gut" },
   { percentage: 25, label: "Stark" },
   { percentage: 50, label: "Unglaublich" },
-  { percentage: 75, label: "Genie" },
+  { percentage: 75, label: "Genial" },
   { percentage: 99, label: "Bienenkönig:in" },
 ];
 
