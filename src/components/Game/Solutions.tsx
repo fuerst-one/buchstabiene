@@ -38,7 +38,7 @@ export const Solutions = ({
       if (savedState?.gameId !== gameId) {
         return;
       }
-      console.log(savedState);
+      setShowSolutions(savedState.solutionsRevealed);
       setFoundWords(savedState.foundWords);
     };
     getSavedState();
