@@ -3,15 +3,18 @@ import { cn } from "@/lib/utils";
 import { useState, useCallback, ComponentProps } from "react";
 import { Message } from "./utils";
 import { useWindowEventListener } from "@/lib/useWindowEventListener";
+import { Lock } from "lucide-react";
 
 export const WordInput = ({
   letterSet,
   message,
+  isRevealed,
   onSubmit,
   onCancelMessage,
 }: {
   letterSet: string[];
   message: Message | null;
+  isRevealed: boolean;
   onSubmit: (word: string) => Promise<void>;
   onCancelMessage: () => void;
 }) => {
@@ -77,6 +80,11 @@ export const WordInput = ({
           {selectedLetters.join("")}
           <span className="relative -top-0.5 text-yellow-500">|</span>
         </div>
+        {isRevealed && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <Lock className="h-4 w-4 text-white" />
+          </div>
+        )}
         {!!message && (
           <div className="absolute -bottom-6 left-0 w-full">
             <div className={cn("text-center", message.className)}>

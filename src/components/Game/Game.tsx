@@ -35,6 +35,7 @@ export const Game = ({
   const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const [isRevealed, setIsRevealed] = useState(false);
 
   useEffect(() => {
     const getSavedState = async () => {
@@ -53,7 +54,7 @@ export const Game = ({
       if (savedState?.gameId !== gameId) {
         return;
       }
-      console.log(savedState);
+      setIsRevealed(savedState.solutionsRevealed);
       setFoundWords(savedState.foundWords);
     };
     getSavedState();
@@ -112,8 +113,10 @@ export const Game = ({
     if (!possibleWords.includes(word)) {
       return await flashMessage("notInWordList");
     }
-    const newFoundWords = [...foundWords, word];
-    onChangeFoundWords(newFoundWords);
+    if (!isRevealed) {
+      const newFoundWords = [...foundWords, word];
+      onChangeFoundWords(newFoundWords);
+    }
     const wordScore = getWordScore(word);
     if (isPangram(word)) {
       return await flashMessage("pangram", wordScore);
@@ -128,6 +131,7 @@ export const Game = ({
       <WordInput
         letterSet={letterSet}
         message={message}
+        isRevealed={isRevealed}
         onSubmit={submitWord}
         onCancelMessage={cancelMessage}
       />
