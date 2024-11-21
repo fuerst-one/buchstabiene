@@ -1,9 +1,9 @@
+import { GameNavigation } from "@/components/Game/GameNavigation";
 import { Solutions } from "@/components/Game/Solutions";
 import dayjs from "@/dayjs";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { getGameByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -28,13 +28,7 @@ export default async function GameByDateSolution({
 
   return (
     <>
-      <h2 className="mb-4 text-center">
-        {date} - <Link href={`/spielen/${date}`}>Spiel</Link> /{" "}
-        <Link href={`/spielen/${date}/highscores`}>Highscores</Link> /{" "}
-        <Link href={`/spielen/${date}/loesungen`} className="underline">
-          Lösungen
-        </Link>
-      </h2>
+      <GameNavigation date={date} activeLink="loesungen" />
       <Suspense fallback={<div>Lädt...</div>}>
         <Solutions user={user} gameId={gameId} possibleWords={possibleWords} />
       </Suspense>

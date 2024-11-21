@@ -1,9 +1,9 @@
+import { GameNavigation } from "@/components/Game/GameNavigation";
 import { Highscores } from "@/components/Game/Highscores";
 import dayjs from "@/dayjs";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { getHighscoresByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -28,13 +28,7 @@ export default async function GameByDateSolution({
 
   return (
     <>
-      <h2 className="mb-4 text-center">
-        {date} - <Link href={`/spielen/${date}`}>Spiel</Link> /{" "}
-        <Link href={`/spielen/${date}/highscores`} className="underline">
-          Highscores
-        </Link>{" "}
-        / <Link href={`/spielen/${date}/loesungen`}>Lösungen</Link>
-      </h2>
+      <GameNavigation date={date} activeLink="highscores" />
       <Suspense fallback={<div>Lädt...</div>}>
         <Highscores user={user} highscores={highscores} />
       </Suspense>

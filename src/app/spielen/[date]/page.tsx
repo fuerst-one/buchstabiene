@@ -1,9 +1,9 @@
 import { Game } from "@/components/Game/Game";
+import { GameNavigation } from "@/components/Game/GameNavigation";
 import dayjs from "@/dayjs";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { getGameByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -22,20 +22,17 @@ export default async function GameByDate({
     redirect(`/spielen/${dayjs().tz(TimezoneDefault).format(DateFormat.date)}`);
   }
 
+  if (dayjs(date).isAfter(dayjs())) {
+    return <div>Spiel ist noch nicht verfügbar</div>;
+  }
+
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
 
   const game = await getGameByDate(date);
 
   return (
     <>
-      <h2 className="mb-4 text-center">
-        {date} -{" "}
-        <Link href={`/spielen/${date}`} className="underline">
-          Spiel
-        </Link>{" "}
-        / <Link href={`/spielen/${date}/highscores`}>Highscores</Link> /{" "}
-        <Link href={`/spielen/${date}/loesungen`}>Lösungen</Link>
-      </h2>
+      <GameNavigation date={date} activeLink="game" />
       <Suspense fallback={<div>Lädt...</div>}>
         <Game user={user} {...game} />
       </Suspense>

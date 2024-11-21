@@ -23,6 +23,7 @@ export default async function Home() {
             selected={playedGames.map((date) =>
               dayjs(date.timestamp, DateFormat.date).toDate(),
             )}
+            disabled={{ after: dayjs().toDate() }}
             onDayClick={async (date) => {
               "use server";
               redirect(
