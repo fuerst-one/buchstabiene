@@ -1,22 +1,18 @@
 "use server";
 import dayjs from "@/dayjs";
-import { savedGames } from "../db/schema";
+import { games, savedGames } from "../db/schema";
 import { db } from "../db/db";
 import { NoSessionError } from "@/lib/errors";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
-import { readWordFile } from "@/lib/readWordFile";
-import { join } from "path";
-import { isPossibleWord, getMaxScore } from "@/components/Game/utils";
+import { count } from "drizzle-orm";
 
-export type Game = {
+export type GameData = {
   gameId: string;
-  letters: string[];
+  letterSet: string[];
   possibleWords: string[];
   maxScore: number;
 };
-
-const gameDataDir = join(process.cwd(), "src/app/_data");
 
 const getGameIdFromData = ({
   letterSet,
@@ -40,24 +36,34 @@ const getDataFromGameId = (gameId: string) => {
   return { letterSet, timestamp };
 };
 
-export const getGameByDate = async (date: string): Promise<Game> => {
-  const words = await readWordFile(join(gameDataDir, "words.txt"));
-  const letterSets = await readWordFile(join(gameDataDir, "letterSets.txt"));
-
+export const getGameByDate = async (date: string): Promise<GameData> => {
   const timestamp = Math.floor(
     dayjs(date, DateFormat.date).tz(TimezoneDefault).startOf("day").valueOf() /
       1000,
   );
 
-  const todayIndex = timestamp % letterSets.length;
-  const letterSet = letterSets[todayIndex];
+  const gameCount = await db
+    .select({ count: count() })
+    .from(games)
+    .then(([result]) => result.count);
 
-  const gameId = getGameIdFromData({ letterSet, date });
-  const letters = letterSet.split("");
-  const possibleWords = words.filter((word) => isPossibleWord(word, letters));
-  const maxScore = getMaxScore(possibleWords);
+  const todayIndex = timestamp % gameCount;
+  const game = await db.query.games.findFirst({
+    where: (games, { eq }) => eq(games.index, todayIndex),
+  });
 
-  return { gameId, letters, possibleWords, maxScore };
+  if (!game) {
+    throw new Error("No game found");
+  }
+
+  const { letterSet, possibleWords, maxScore } = game;
+
+  return {
+    gameId: getGameIdFromData({ letterSet, date }),
+    letterSet: letterSet.split(""),
+    possibleWords: possibleWords.split(","),
+    maxScore,
+  };
 };
 
 export const updateSavedGame = async (gameId: string, foundWords: string[]) => {

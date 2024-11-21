@@ -123,6 +123,16 @@ export const savedGameRelations = relations(savedGames, ({ one }) => ({
   user: one(users, { fields: [savedGames.userId], references: [users.id] }),
 }));
 
+export const games = pgTable("games", {
+  index: integer("index").notNull().primaryKey(),
+  letterSet: varchar("letter_set", { length: 7 }).unique().notNull(),
+  possibleWords: text("possible_words").notNull(),
+  maxScore: integer("max_score").notNull(),
+});
+export type Game = typeof games.$inferSelect;
+export type GameInsert = typeof games.$inferInsert;
+export const gameSchema = createSelectSchema(games);
+
 export const schema = {
   users,
   accounts,
@@ -130,6 +140,7 @@ export const schema = {
   verificationTokens,
   authenticators,
   savedGames,
+  games,
 };
 
 export const tables = [
@@ -139,4 +150,5 @@ export const tables = [
   "verificationTokens",
   "authenticators",
   "savedGames",
+  "games",
 ] as const;

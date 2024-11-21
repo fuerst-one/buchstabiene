@@ -15,13 +15,13 @@ type SaveState = {
 export const Game = ({
   user,
   gameId,
-  letters,
+  letterSet,
   possibleWords,
   maxScore,
 }: {
   user: User | null;
   gameId: string;
-  letters: string[];
+  letterSet: string[];
   possibleWords: string[];
   maxScore: number;
 }) => {
@@ -65,7 +65,7 @@ export const Game = ({
 
   return (
     <GameInterface
-      letters={letters}
+      letterSet={letterSet}
       possibleWords={possibleWords}
       maxScore={maxScore}
       foundWords={foundWords}

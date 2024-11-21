@@ -5,18 +5,18 @@ import { Message } from "./utils";
 import { useWindowEventListener } from "@/lib/useWindowEventListener";
 
 export const WordInput = ({
-  letters,
+  letterSet,
   message,
   onSubmit,
   onCancelMessage,
 }: {
-  letters: string[];
+  letterSet: string[];
   message: Message | null;
   onSubmit: (word: string) => Promise<void>;
   onCancelMessage: () => void;
 }) => {
-  const mainLetter = letters[0];
-  const [otherLetters, setOtherLetters] = useState(letters.slice(1));
+  const mainLetter = letterSet[0];
+  const [otherLetters, setOtherLetters] = useState(letterSet.slice(1));
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
 
   const addLetter = useCallback((letter: string) => {
@@ -44,7 +44,7 @@ export const WordInput = ({
         setSelectedLetters([]);
       }
       const key = event.key.toLowerCase();
-      if (letters.includes(key)) {
+      if (letterSet.includes(key)) {
         addLetter(event.key);
       } else if (key === "backspace") {
         if (event.ctrlKey || event.altKey) {

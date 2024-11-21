@@ -7,13 +7,13 @@ import { Stage } from "./Stage";
 import { Message, MessageType, messages } from "./utils";
 
 export const GameInterface = ({
-  letters,
+  letterSet,
   possibleWords,
   maxScore,
   foundWords = [],
   onChangeFoundWords,
 }: {
-  letters: string[];
+  letterSet: string[];
   possibleWords: string[];
   maxScore: number;
   foundWords: string[];
@@ -52,7 +52,7 @@ export const GameInterface = ({
     if (word.length < 4) {
       return await flashMessage("tooShort");
     }
-    if (!word.includes(letters[0])) {
+    if (!word.includes(letterSet[0])) {
       return await flashMessage("centerMissing");
     }
     if (foundWords.includes(word)) {
@@ -75,7 +75,7 @@ export const GameInterface = ({
       <Stage foundWords={foundWords} maxScore={maxScore} />
       <FoundWords foundWords={foundWords} />
       <WordInput
-        letters={letters}
+        letterSet={letterSet}
         message={message}
         onSubmit={submitWord}
         onCancelMessage={cancelMessage}
