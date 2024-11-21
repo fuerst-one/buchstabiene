@@ -146,6 +146,7 @@ export const getHighscoresByDate = async (date: string) => {
   const highscores = savedGames.map((savedGame) => ({
     username: savedGame.user.name,
     foundWords: savedGame.foundWords,
+    isRevealed: savedGame.solutionsRevealed,
     score: savedGame.foundWords.reduce(
       (acc, word) => acc + getWordScore(word),
       0,
@@ -158,5 +159,6 @@ export const getHighscoresByDate = async (date: string) => {
 export type Highscore = {
   username: string;
   foundWords: string[];
+  isRevealed: boolean;
   score: number;
 };

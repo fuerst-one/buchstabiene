@@ -4,14 +4,16 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
 import { Button } from "../ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock } from "lucide-react";
 
 export const GameNavigation = ({
   date,
   activeLink,
+  isRevealed,
 }: {
   date: string;
   activeLink: "game" | "highscores" | "loesungen";
+  isRevealed?: boolean;
 }) => {
   const isToday = dayjs(date, DateFormat.date).isSame(dayjs(), "day");
   const dayBefore = dayjs(date, DateFormat.date)
@@ -34,7 +36,7 @@ export const GameNavigation = ({
             "rounded-sm bg-yellow-500/30": isToday,
           })}
         >
-          {date}
+          {date} {isRevealed && <Lock />}
         </h2>
         <Link href={`/spielen/${dayAfter}`}>
           <Button variant="outline">
