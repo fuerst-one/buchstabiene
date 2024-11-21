@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   varchar,
+  serial,
 } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { primaryKey } from "drizzle-orm/pg-core";
@@ -108,6 +109,7 @@ export const savedGames = pgTable(
       .$type<string[]>()
       .notNull()
       .$defaultFn(() => []),
+    solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
   },
   (savedGames) => {
     return {
@@ -120,11 +122,14 @@ export type SavedGameInsert = typeof savedGames.$inferInsert;
 export const savedGameSchema = createSelectSchema(savedGames);
 
 export const savedGameRelations = relations(savedGames, ({ one }) => ({
-  user: one(users, { fields: [savedGames.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [savedGames.userId],
+    references: [users.id],
+  }),
 }));
 
 export const games = pgTable("games", {
-  index: integer("index").notNull().primaryKey(),
+  index: serial("index").notNull().primaryKey(),
   letterSet: varchar("letter_set", { length: 7 }).unique().notNull(),
   possibleWords: text("possible_words").notNull(),
   maxScore: integer("max_score").notNull(),
@@ -135,11 +140,13 @@ export const gameSchema = createSelectSchema(games);
 
 export const schema = {
   users,
+  userRelations,
   accounts,
   sessions,
   verificationTokens,
   authenticators,
   savedGames,
+  savedGameRelations,
   games,
 };
 

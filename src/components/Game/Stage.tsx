@@ -43,7 +43,7 @@ export const Stage = ({
 
   return (
     <div
-      className="max-w-full overflow-y-auto rounded-sm bg-white/10 px-2 py-1"
+      className="w-full rounded-sm bg-white/10 px-2 py-1"
       onClick={() => setShowDetailedScore((prev) => !prev)}
     >
       <div className="flex items-center gap-10">

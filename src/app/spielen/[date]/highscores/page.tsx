@@ -1,7 +1,7 @@
-import { Game } from "@/components/Game/Game";
+import { Highscores } from "@/components/Game/Highscores";
 import dayjs from "@/dayjs";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
-import { getGameByDate } from "@/server/api/game";
+import { getHighscoresByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -11,7 +11,7 @@ import { Suspense } from "react";
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-export default async function GameByDate({
+export default async function GameByDateSolution({
   params,
 }: {
   params: Promise<{ date: string }>;
@@ -24,20 +24,19 @@ export default async function GameByDate({
 
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
 
-  const game = await getGameByDate(date);
+  const highscores = await getHighscoresByDate(date);
 
   return (
     <>
       <h2 className="mb-4 text-center">
-        {date} -{" "}
-        <Link href={`/spielen/${date}`} className="underline">
-          Spiel
+        {date} - <Link href={`/spielen/${date}`}>Spiel</Link> /{" "}
+        <Link href={`/spielen/${date}/highscores`} className="underline">
+          Highscores
         </Link>{" "}
-        / <Link href={`/spielen/${date}/highscores`}>Highscores</Link> /{" "}
-        <Link href={`/spielen/${date}/loesungen`}>Lösungen</Link>
+        / <Link href={`/spielen/${date}/loesungen`}>Lösungen</Link>
       </h2>
       <Suspense fallback={<div>Lädt...</div>}>
-        <Game user={user} {...game} />
+        <Highscores user={user} highscores={highscores} />
       </Suspense>
     </>
   );

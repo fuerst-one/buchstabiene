@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} dark bg-background text-foreground antialiased`}
       >
         <_Layout>
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+          <Suspense fallback={<div>Lädt...</div>}>{children}</Suspense>
         </_Layout>
       </body>
     </html>

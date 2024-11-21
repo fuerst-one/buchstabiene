@@ -5,7 +5,8 @@ import { db } from "../db/db";
 import { NoSessionError } from "@/lib/errors";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
-import { count } from "drizzle-orm";
+import { and, eq, count } from "drizzle-orm";
+import { getWordScore } from "@/components/Game/utils";
 
 export type GameData = {
   gameId: string;
@@ -87,6 +88,20 @@ export const updateSavedGame = async (gameId: string, foundWords: string[]) => {
     });
 };
 
+export const revealSolutionsForUser = async (gameId: string) => {
+  const session = await useServerAuth.getState().getSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    throw new NoSessionError();
+  }
+
+  await db
+    .update(savedGames)
+    .set({ solutionsRevealed: true })
+    .where(and(eq(savedGames.gameId, gameId), eq(savedGames.userId, userId)));
+};
+
 export const getSavedGame = async (gameId: string) => {
   const session = await useServerAuth.getState().getSession();
   const userId = session?.user?.id;
@@ -116,4 +131,32 @@ export const getPlayedGames = async () => {
   });
 
   return savedGames.map((game) => getDataFromGameId(game.gameId));
+};
+
+export const getHighscoresByDate = async (date: string) => {
+  const game = await getGameByDate(date);
+
+  const savedGames = await db.query.savedGames.findMany({
+    where: (savedGames, { eq }) => eq(savedGames.gameId, game.gameId),
+    with: {
+      user: true,
+    },
+  });
+
+  const highscores = savedGames.map((savedGame) => ({
+    username: savedGame.user.name,
+    foundWords: savedGame.foundWords,
+    score: savedGame.foundWords.reduce(
+      (acc, word) => acc + getWordScore(word),
+      0,
+    ),
+  }));
+
+  return highscores;
+};
+
+export type Highscore = {
+  username: string;
+  foundWords: string[];
+  score: number;
 };

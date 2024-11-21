@@ -9,7 +9,7 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] }) => {
 
   return (
     <div
-      className="overflow-y-auto rounded-sm bg-white/10 px-2 py-1"
+      className="w-full rounded-sm bg-white/10 px-2 py-1"
       onClick={() => setShowAllFoundWords((prev) => !prev)}
     >
       <div className="flex items-center justify-between">
@@ -29,9 +29,12 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] }) => {
             {foundWords.toSorted().map((word) => (
               <div
                 key={word}
-                className={cn("w-1/2 px-1 leading-7 text-white", {
-                  "font-bold": isPangram(word),
-                })}
+                className={cn(
+                  "w-1/2 whitespace-nowrap px-1 leading-7 text-white",
+                  {
+                    "font-bold": isPangram(word),
+                  },
+                )}
               >
                 {capitalize(word)}{" "}
                 <span className="text-white/50">({getWordScore(word)})</span>

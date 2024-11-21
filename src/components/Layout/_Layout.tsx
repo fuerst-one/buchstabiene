@@ -33,8 +33,15 @@ export const _Layout = async ({ children }: { children: ReactNode }) => {
           )}
         </div>
       </div>
-      <div className="container mx-auto flex h-full flex-col items-center justify-center py-6 md:py-12">
+      <div className="container mx-auto flex h-full max-w-screen-sm flex-col items-center justify-center py-6 md:py-12">
         {children}
+      </div>
+      <div className="flex h-12 items-center justify-center border-t border-white/10 px-4 py-2">
+        <div className="text-sm">
+          &copy; fuerst.one {new Date().getFullYear()} -{" "}
+          <Link href="https://fuerst.one/impressum">Impressum</Link>{" "}
+          <Link href="https://fuerst.one/datenschutz">Datenschutz</Link>
+        </div>
       </div>
     </div>
   );
