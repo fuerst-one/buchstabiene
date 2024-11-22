@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { updateSavedGame } from "@/server/api/game";
+import { GameData, updateSavedGame } from "@/server/api/game";
 import { getSavedGame } from "@/server/api/game";
 import { User } from "@/server/db/schema";
 import { getWordScore, Message, messages, MessageType } from "./utils";
@@ -19,17 +19,13 @@ export type SaveState = {
 
 export const Game = ({
   user,
-  gameId,
-  letterSet,
-  possibleWords,
-  maxScore,
+  gameData,
 }: {
   user: User | null;
-  gameId: string;
-  letterSet: string[];
-  possibleWords: string[];
-  maxScore: number;
+  gameData: GameData;
 }) => {
+  const { gameId, letterSet, possibleWords, maxScore } = gameData;
+
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [message, setMessage] = useState<Message | null>(null);
   const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(

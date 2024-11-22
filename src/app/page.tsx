@@ -5,6 +5,7 @@ import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { Calendar } from "@/components/ui/calendar";
 import { getPlayedGames } from "@/server/api/game";
 import { redirect } from "next/navigation";
+import { GLOBAL_CONFIG } from "@/config";
 
 export default async function Home() {
   const playedGames = await getPlayedGames();
@@ -23,7 +24,10 @@ export default async function Home() {
             selected={playedGames.map((date) =>
               dayjs(date.timestamp, DateFormat.date).toDate(),
             )}
-            disabled={{ after: dayjs().toDate() }}
+            disabled={{
+              before: dayjs(GLOBAL_CONFIG.firstGameDate).toDate(),
+              after: dayjs().toDate(),
+            }}
             onDayClick={async (date) => {
               "use server";
               redirect(

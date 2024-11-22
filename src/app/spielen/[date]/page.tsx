@@ -22,11 +22,14 @@ export default async function GameByDate({
     redirect(`/spielen/${dayjs().tz(TimezoneDefault).format(DateFormat.date)}`);
   }
 
+  const gameData = await getGameByDate(date);
+
   if (
     dayjs(date, DateFormat.date)
       .tz(TimezoneDefault)
       .startOf("day")
-      .isAfter(dayjs())
+      .isAfter(dayjs()) ||
+    !gameData
   ) {
     return (
       <>
@@ -39,13 +42,12 @@ export default async function GameByDate({
   }
 
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
-  const game = await getGameByDate(date);
 
   return (
     <>
       <GameNavigation date={date} activeLink="game" />
       <Suspense fallback={<div>Lädt...</div>}>
-        <Game user={user} {...game} />
+        <Game user={user} gameData={gameData} />
       </Suspense>
     </>
   );

@@ -1,18 +1,19 @@
 "use server";
 import dayjs from "@/dayjs";
-import { games, savedGames } from "../db/schema";
+import { savedGames } from "../db/schema";
 import { db } from "../db/db";
 import { NoSessionError } from "@/lib/errors";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
-import { and, eq, count } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getTotalScore } from "@/components/Game/utils";
+import { Dayjs } from "dayjs";
 
-export type GameData = {
-  gameId: string;
-  letterSet: string[];
-  possibleWords: string[];
-  maxScore: number;
+const getGameTimestamp = (date: Dayjs) => {
+  return Math.floor(date.tz(TimezoneDefault).startOf("day").valueOf() / 1000);
+};
+const getGameTimestampFromDate = (date: string) => {
+  return getGameTimestamp(dayjs(date, DateFormat.date));
 };
 
 const getGameIdFromData = ({
@@ -22,10 +23,7 @@ const getGameIdFromData = ({
   letterSet: string;
   date: string;
 }) => {
-  const timestamp = Math.floor(
-    dayjs(date, DateFormat.date).tz(TimezoneDefault).startOf("day").valueOf() /
-      1000,
-  );
+  const timestamp = getGameTimestampFromDate(date);
   return Buffer.from(letterSet + timestamp).toString("base64");
 };
 const getDataFromGameId = (gameId: string) => {
@@ -37,35 +35,31 @@ const getDataFromGameId = (gameId: string) => {
   return { letterSet, timestamp };
 };
 
-export const getGameByDate = async (date: string): Promise<GameData> => {
-  const timestamp = Math.floor(
-    dayjs(date, DateFormat.date).tz(TimezoneDefault).startOf("day").valueOf() /
-      1000,
-  );
-
-  const gameCount = await db
-    .select({ count: count() })
-    .from(games)
-    .then(([result]) => result.count);
-
-  const todayIndex = timestamp % gameCount;
-  const game = await db.query.games.findFirst({
-    where: (games, { eq }) => eq(games.index, todayIndex),
+export const getGameByDate = async (date: string) => {
+  const gameDate = await db.query.gameDates.findFirst({
+    where: (gameDates, { eq }) => eq(gameDates.date, date),
+    with: {
+      game: true,
+    },
   });
 
-  if (!game) {
-    throw new Error("No game found");
+  if (!gameDate) {
+    return null;
   }
 
-  const { letterSet, possibleWords, maxScore } = game;
+  const { letterSet, possibleWords, maxScore } = gameDate.game;
 
   return {
+    date,
+    index: gameDate.gameIndex,
     gameId: getGameIdFromData({ letterSet, date }),
     letterSet: letterSet.split(""),
     possibleWords: possibleWords.split(","),
     maxScore,
   };
 };
+export type GameDataResponse = Awaited<ReturnType<typeof getGameByDate>>;
+export type GameData = NonNullable<GameDataResponse>;
 
 export const updateSavedGame = async (gameId: string, foundWords: string[]) => {
   const session = await useServerAuth.getState().getSession();
@@ -135,6 +129,10 @@ export const getPlayedGames = async () => {
 
 export const getHighscoresByDate = async (date: string) => {
   const game = await getGameByDate(date);
+
+  if (!game) {
+    return [];
+  }
 
   const savedGames = await db.query.savedGames.findMany({
     where: (savedGames, { eq }) => eq(savedGames.gameId, game.gameId),

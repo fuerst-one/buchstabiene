@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "../ui/button";
 import { ArrowLeft, ArrowRight, Lock } from "lucide-react";
+import { GLOBAL_CONFIG } from "@/config";
 
 export const GameNavigation = ({
   date,
@@ -24,20 +25,27 @@ export const GameNavigation = ({
     .startOf("day")
     .subtract(1, "day")
     .format(DateFormat.date);
+
   const dayAfter = dayjs(date, DateFormat.date)
     .tz(TimezoneDefault)
     .startOf("day")
     .add(1, "day")
     .format(DateFormat.date);
 
+  const isDayBeforeValid = !dayjs(dayBefore).isBefore(
+    dayjs(GLOBAL_CONFIG.firstGameDate),
+  );
   const isDayAfterValid = !dayjs(dayAfter).isAfter(dayjs());
   const arrowLinkTarget = `${activeLink === "game" ? "" : `/${activeLink}`}`;
 
   return (
     <div className="mb-4 space-y-2 text-center">
       <div className="flex justify-center gap-2">
-        <Link href={`/spielen/${dayBefore}${arrowLinkTarget}`}>
-          <Button variant="outline">
+        <Link
+          href={`/spielen/${dayBefore}${arrowLinkTarget}`}
+          className={cn({ "pointer-events-none": !isDayBeforeValid })}
+        >
+          <Button variant="outline" disabled={!isDayBeforeValid}>
             <ArrowLeft />
           </Button>
         </Link>

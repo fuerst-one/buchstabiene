@@ -138,6 +138,23 @@ export type Game = typeof games.$inferSelect;
 export type GameInsert = typeof games.$inferInsert;
 export const gameSchema = createSelectSchema(games);
 
+export const gameDates = pgTable("game_dates", {
+  date: varchar("date", { length: 10 }).notNull().primaryKey(),
+  gameIndex: integer("game_index")
+    .notNull()
+    .references(() => games.index),
+});
+export type GameDate = typeof gameDates.$inferSelect;
+export type GameDateInsert = typeof gameDates.$inferInsert;
+export const gameDateSchema = createSelectSchema(gameDates);
+
+export const gameDateRelations = relations(gameDates, ({ one }) => ({
+  game: one(games, {
+    fields: [gameDates.gameIndex],
+    references: [games.index],
+  }),
+}));
+
 export const schema = {
   users,
   userRelations,
@@ -148,6 +165,8 @@ export const schema = {
   savedGames,
   savedGameRelations,
   games,
+  gameDates,
+  gameDateRelations,
 };
 
 export const tables = [
@@ -158,4 +177,5 @@ export const tables = [
   "authenticators",
   "savedGames",
   "games",
+  "gameDates",
 ] as const;
