@@ -22,7 +22,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Login</CardTitle>
@@ -60,11 +60,11 @@ export default async function LoginPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col">
+          <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit">
               Login
             </Button>
-            <div className="mt-4 space-y-2 text-center text-sm">
+            <div className="flex flex-col gap-2 text-center text-sm">
               <Link
                 href="/forgot-password"
                 className="block text-blue-500 hover:underline"

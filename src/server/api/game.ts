@@ -6,7 +6,7 @@ import { NoSessionError } from "@/lib/errors";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { and, eq, count } from "drizzle-orm";
-import { getWordScore } from "@/components/Game/utils";
+import { getTotalScore } from "@/components/Game/utils";
 
 export type GameData = {
   gameId: string;
@@ -147,10 +147,7 @@ export const getHighscoresByDate = async (date: string) => {
     username: savedGame.user.name,
     foundWords: savedGame.foundWords,
     isRevealed: savedGame.solutionsRevealed,
-    score: savedGame.foundWords.reduce(
-      (acc, word) => acc + getWordScore(word),
-      0,
-    ),
+    score: getTotalScore(savedGame.foundWords),
   }));
 
   return highscores;

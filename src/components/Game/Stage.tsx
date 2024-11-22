@@ -1,5 +1,5 @@
 "use client";
-import { getWordScore } from "./utils";
+import { getTotalScore } from "./utils";
 import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 import { useState } from "react";
@@ -25,10 +25,7 @@ export const Stage = ({
 }) => {
   const [showDetailedScore, setShowDetailedScore] = useState(false);
 
-  const currentScore = foundWords.reduce(
-    (acc, word) => acc + getWordScore(word),
-    0,
-  );
+  const currentScore = getTotalScore(foundWords);
   const currentPercentage = currentScore / maxScore;
   const stagesByScore = stagesByPercentage.map(({ percentage, label }) => ({
     score: Math.floor(maxScore * (Number(percentage) / 100)),

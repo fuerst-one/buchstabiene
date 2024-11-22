@@ -8,6 +8,7 @@ import { useState } from "react";
 import { SAVE_STATE_LOCAL_STORAGE_KEY } from "./Game";
 import { SaveState } from "./Game";
 import { Button } from "../ui/button";
+import { TriangleAlert } from "lucide-react";
 
 export const Solutions = ({
   user,
@@ -63,13 +64,18 @@ export const Solutions = ({
   return (
     <div className="w-full rounded-sm bg-white/10 px-2 py-1">
       {!showSolutions ? (
-        <div className="mb-6 mt-10 flex flex-col items-center gap-3">
+        <div className="mb-8 mt-6 text-center">
+          <p className="mb-2 font-semibold">
+            <TriangleAlert className="inline h-4 w-4" /> Achtung: Das Spiel wird
+            damit beendet.
+          </p>
+          <p className="mb-6 text-sm">
+            Du kannst weiterhin Wörter suchen, aber deine Punkte werden nicht
+            mehr aktualisiert.
+          </p>
           <Button onClick={revealSolutions} size="lg">
             Lösungen anzeigen
           </Button>
-          <div className="text-center text-sm text-white/50">
-            Achtung: Das Spiel wird damit beendet.
-          </div>
         </div>
       ) : (
         <>

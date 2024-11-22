@@ -23,7 +23,7 @@ export default async function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Registrierung</CardTitle>
@@ -84,7 +84,7 @@ export default async function SignupPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col">
+          <CardFooter className="flex flex-col gap-2">
             <Button className="w-full" type="submit">
               Registrieren
             </Button>

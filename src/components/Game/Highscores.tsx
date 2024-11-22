@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Highscore } from "@/server/api/game";
 import { User } from "@/server/db/schema";
-import { Lock } from "lucide-react";
+import { Lock, Trophy } from "lucide-react";
 import { stagesByPercentage } from "./Stage";
 
 const getStageByScore = (currentScore: number, maxScore: number) => {
@@ -33,7 +33,7 @@ export const Highscores = ({
         <div className="space-y-1">
           {highscores
             .toSorted((a, b) => b.score - a.score)
-            .map((highscore) => (
+            .map((highscore, idx) => (
               <div
                 key={highscore.username}
                 className={cn(
@@ -46,6 +46,9 @@ export const Highscores = ({
               >
                 <span>
                   {highscore.username}{" "}
+                  {idx === 0 && (
+                    <Trophy className="relative -top-0.5 inline h-4 w-4" />
+                  )}
                   {highscore.isRevealed && (
                     <Lock className="relative -top-0.5 inline h-4 w-4" />
                   )}
@@ -59,9 +62,7 @@ export const Highscores = ({
             ))}
         </div>
       ) : (
-        <div className="w-full text-center">
-          Noch keine Highscores vorhanden
-        </div>
+        <p className="text-center">Noch keine Highscores vorhanden</p>
       )}
     </div>
   );

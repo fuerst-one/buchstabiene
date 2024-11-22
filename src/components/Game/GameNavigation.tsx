@@ -1,5 +1,5 @@
 import dayjs from "@/dayjs";
-import { DateFormat } from "@/lib/DateFormat";
+import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
@@ -15,18 +15,28 @@ export const GameNavigation = ({
   activeLink: "game" | "highscores" | "loesungen";
   isRevealed?: boolean;
 }) => {
-  const isToday = dayjs(date, DateFormat.date).isSame(dayjs(), "day");
+  const isToday = dayjs(date, DateFormat.date)
+    .tz(TimezoneDefault)
+    .isSame(dayjs().tz(TimezoneDefault), "day");
+
   const dayBefore = dayjs(date, DateFormat.date)
+    .tz(TimezoneDefault)
+    .startOf("day")
     .subtract(1, "day")
     .format(DateFormat.date);
   const dayAfter = dayjs(date, DateFormat.date)
+    .tz(TimezoneDefault)
+    .startOf("day")
     .add(1, "day")
     .format(DateFormat.date);
+
+  const isDayAfterValid = !dayjs(dayAfter).isAfter(dayjs());
+  const arrowLinkTarget = `${activeLink === "game" ? "" : `/${activeLink}`}`;
 
   return (
     <div className="mb-4 space-y-2 text-center">
       <div className="flex justify-center gap-2">
-        <Link href={`/spielen/${dayBefore}`}>
+        <Link href={`/spielen/${dayBefore}${arrowLinkTarget}`}>
           <Button variant="outline">
             <ArrowLeft />
           </Button>
@@ -38,8 +48,11 @@ export const GameNavigation = ({
         >
           {date} {isRevealed && <Lock />}
         </h2>
-        <Link href={`/spielen/${dayAfter}`}>
-          <Button variant="outline">
+        <Link
+          href={`/spielen/${dayAfter}${arrowLinkTarget}`}
+          className={cn({ "pointer-events-none": !isDayAfterValid })}
+        >
+          <Button variant="outline" disabled={!isDayAfterValid}>
             <ArrowRight />
           </Button>
         </Link>

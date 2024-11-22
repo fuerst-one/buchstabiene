@@ -54,8 +54,11 @@ export const getWordScore = (word: string) => {
   return word.length;
 };
 
+export const getTotalScore = (words: string[]) => {
+  return words.reduce((acc, word) => acc + getWordScore(word), 0);
+};
+
 export const getMaxScore = (possibleWords: string[]) => {
-  return possibleWords
-    .filter((word) => word.length <= 7)
-    .reduce((acc, word) => acc + getWordScore(word), 0);
+  const filteredWords = possibleWords.filter((word) => word.length <= 7);
+  return getTotalScore(filteredWords);
 };

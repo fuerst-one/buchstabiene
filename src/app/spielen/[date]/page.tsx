@@ -22,12 +22,23 @@ export default async function GameByDate({
     redirect(`/spielen/${dayjs().tz(TimezoneDefault).format(DateFormat.date)}`);
   }
 
-  if (dayjs(date).isAfter(dayjs())) {
-    return <div>Spiel ist noch nicht verfügbar</div>;
+  if (
+    dayjs(date, DateFormat.date)
+      .tz(TimezoneDefault)
+      .startOf("day")
+      .isAfter(dayjs())
+  ) {
+    return (
+      <>
+        <GameNavigation date={date} activeLink="game" />
+        <div className="w-full rounded-sm bg-white/10 p-2">
+          <p className="text-center">Spiel ist noch nicht verfügbar</p>
+        </div>
+      </>
+    );
   }
 
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
-
   const game = await getGameByDate(date);
 
   return (
