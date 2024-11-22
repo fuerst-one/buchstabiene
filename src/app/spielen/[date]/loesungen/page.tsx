@@ -1,7 +1,7 @@
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { Solutions } from "@/components/Game/Solutions";
-import dayjs from "@/dayjs";
-import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
+import { dayjsTz } from "@/dayjs";
+import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { getGameByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
@@ -16,24 +16,18 @@ export default async function GameByDateSolution({
 }: {
   params: Promise<{ date: string }>;
 }) {
-  const { date } = await params;
+  const { date: dateString } = await params;
 
-  if (!date || date === "heute" || !dayjs(date).isValid()) {
-    redirect(`/spielen/${dayjs().tz(TimezoneDefault).format(DateFormat.date)}`);
+  if (!dayjsTz(dateString).isValid()) {
+    redirect(`/spielen/${gameDateString()}`);
   }
 
-  const gameData = await getGameByDate(date);
+  const gameData = await getGameByDate(dateString);
 
-  if (
-    dayjs(date, DateFormat.date)
-      .tz(TimezoneDefault)
-      .startOf("day")
-      .isAfter(dayjs()) ||
-    !gameData
-  ) {
+  if (gameDateDate(dateString).startOf("day").isAfter(dayjsTz()) || !gameData) {
     return (
       <>
-        <GameNavigation date={date} activeLink="loesungen" />
+        <GameNavigation dateString={dateString} activeLink="loesungen" />
         <div className="w-full rounded-sm bg-white/10 p-2">
           <p className="text-center">Spiel ist noch nicht verfügbar</p>
         </div>
@@ -46,7 +40,7 @@ export default async function GameByDateSolution({
 
   return (
     <>
-      <GameNavigation date={date} activeLink="loesungen" />
+      <GameNavigation dateString={dateString} activeLink="loesungen" />
       <Suspense fallback={<div>Lädt...</div>}>
         <Solutions user={user} gameId={gameId} possibleWords={possibleWords} />
       </Suspense>

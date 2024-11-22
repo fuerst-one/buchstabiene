@@ -1,5 +1,5 @@
-import dayjs from "@/dayjs";
-import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
+import { dayjsTz } from "@/dayjs";
+import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
@@ -8,34 +8,24 @@ import { ArrowLeft, ArrowRight, Lock } from "lucide-react";
 import { GLOBAL_CONFIG } from "@/config";
 
 export const GameNavigation = ({
-  date,
+  dateString,
   activeLink,
   isRevealed,
 }: {
-  date: string;
+  dateString: string;
   activeLink: "game" | "highscores" | "loesungen";
   isRevealed?: boolean;
 }) => {
-  const isToday = dayjs(date, DateFormat.date)
-    .tz(TimezoneDefault)
-    .isSame(dayjs().tz(TimezoneDefault), "day");
+  const isToday = gameDateDate(dateString).isSame(dayjsTz(), "day");
 
-  const dayBefore = dayjs(date, DateFormat.date)
-    .tz(TimezoneDefault)
-    .startOf("day")
-    .subtract(1, "day")
-    .format(DateFormat.date);
-
-  const dayAfter = dayjs(date, DateFormat.date)
-    .tz(TimezoneDefault)
-    .startOf("day")
-    .add(1, "day")
-    .format(DateFormat.date);
-
-  const isDayBeforeValid = !dayjs(dayBefore).isBefore(
-    dayjs(GLOBAL_CONFIG.firstGameDate),
+  const dayBefore = gameDateString(gameDateDate(dateString).subtract(1, "day"));
+  const isDayBeforeValid = !gameDateDate(dayBefore).isBefore(
+    gameDateDate(GLOBAL_CONFIG.firstGameDate),
   );
-  const isDayAfterValid = !dayjs(dayAfter).isAfter(dayjs());
+
+  const dayAfter = gameDateString(gameDateDate(dateString).add(1, "day"));
+  const isDayAfterValid = !gameDateDate(dayAfter).isAfter(dayjsTz());
+
   const arrowLinkTarget = `${activeLink === "game" ? "" : `/${activeLink}`}`;
 
   return (
@@ -54,7 +44,7 @@ export const GameNavigation = ({
             "rounded-sm bg-yellow-500/30": isToday,
           })}
         >
-          {date} {isRevealed && <Lock />}
+          {dateString} {isRevealed && <Lock />}
         </h2>
         <Link
           href={`/spielen/${dayAfter}${arrowLinkTarget}`}
@@ -67,21 +57,21 @@ export const GameNavigation = ({
       </div>
       <div>
         <Link
-          href={`/spielen/${date}`}
+          href={`/spielen/${dateString}`}
           className={cn({ underline: activeLink === "game" })}
         >
           Spiel
         </Link>{" "}
         /{" "}
         <Link
-          href={`/spielen/${date}/highscores`}
+          href={`/spielen/${dateString}/highscores`}
           className={cn({ underline: activeLink === "highscores" })}
         >
           Highscores
         </Link>{" "}
         /{" "}
         <Link
-          href={`/spielen/${date}/loesungen`}
+          href={`/spielen/${dateString}/loesungen`}
           className={cn({ underline: activeLink === "loesungen" })}
         >
           Lösungen

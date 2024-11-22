@@ -1,7 +1,7 @@
-import dayjs from "@/dayjs";
+import { dayjsTz } from "@/dayjs";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
+import { gameDateString } from "@/lib/DateFormat";
 import { Calendar } from "@/components/ui/calendar";
 import { getPlayedGames } from "@/server/api/game";
 import { redirect } from "next/navigation";
@@ -22,19 +22,15 @@ export default async function Home() {
           <h2 className="text-lg font-bold">Letzte Spiele</h2>
           <Calendar
             selected={playedGames.map((date) =>
-              dayjs(date.timestamp, DateFormat.date).toDate(),
+              dayjsTz(date.timestamp).toDate(),
             )}
             disabled={{
-              before: dayjs(GLOBAL_CONFIG.firstGameDate).toDate(),
-              after: dayjs().toDate(),
+              before: dayjsTz(GLOBAL_CONFIG.firstGameDate).toDate(),
+              after: dayjsTz().toDate(),
             }}
             onDayClick={async (date) => {
               "use server";
-              redirect(
-                `/spielen/${dayjs(date, DateFormat.date)
-                  .tz(TimezoneDefault)
-                  .format(DateFormat.date)}`,
-              );
+              redirect(`/spielen/${gameDateString(date)}`);
             }}
           />
         </div>

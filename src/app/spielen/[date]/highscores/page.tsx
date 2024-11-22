@@ -1,7 +1,7 @@
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { Highscores } from "@/components/Game/Highscores";
-import dayjs from "@/dayjs";
-import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
+import { dayjsTz } from "@/dayjs";
+import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { getGameByDate, getHighscoresByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
@@ -16,24 +16,18 @@ export default async function GameByDateSolution({
 }: {
   params: Promise<{ date: string }>;
 }) {
-  const { date } = await params;
+  const { date: dateString } = await params;
 
-  if (!date || date === "heute" || !dayjs(date).isValid()) {
-    redirect(`/spielen/${dayjs().tz(TimezoneDefault).format(DateFormat.date)}`);
+  if (!dayjsTz(dateString).isValid()) {
+    redirect(`/spielen/${gameDateString()}`);
   }
 
-  const gameData = await getGameByDate(date);
+  const gameData = await getGameByDate(dateString);
 
-  if (
-    dayjs(date, DateFormat.date)
-      .tz(TimezoneDefault)
-      .startOf("day")
-      .isAfter(dayjs()) ||
-    !gameData
-  ) {
+  if (gameDateDate(dateString).startOf("day").isAfter(dayjsTz()) || !gameData) {
     return (
       <>
-        <GameNavigation date={date} activeLink="highscores" />
+        <GameNavigation dateString={dateString} activeLink="highscores" />
         <div className="w-full rounded-sm bg-white/10 p-2">
           <p className="text-center">Spiel ist noch nicht verfügbar</p>
         </div>
@@ -43,11 +37,11 @@ export default async function GameByDateSolution({
 
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
   const game = gameData;
-  const highscores = await getHighscoresByDate(date);
+  const highscores = await getHighscoresByDate(dateString);
 
   return (
     <>
-      <GameNavigation date={date} activeLink="highscores" />
+      <GameNavigation dateString={dateString} activeLink="highscores" />
       <Suspense fallback={<div>Lädt...</div>}>
         <Highscores
           user={user}

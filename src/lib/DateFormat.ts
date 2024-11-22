@@ -1,3 +1,5 @@
+import dayjs, { dayjsTz } from "@/dayjs";
+
 export const DateFormat = {
   date: "YYYY-MM-DD",
   dateDisplay: "DD.MM.YYYY",
@@ -6,4 +8,10 @@ export const DateFormat = {
   dateTimeDisplay: "DD.MM.YYYY HH:mm",
 };
 
-export const TimezoneDefault = "Europe/Berlin";
+export const gameDateString = (date?: dayjs.ConfigType) => {
+  return dayjsTz(date).format(DateFormat.date);
+};
+
+export const gameDateDate = (date?: dayjs.ConfigType) => {
+  return dayjsTz(date, DateFormat.date);
+};

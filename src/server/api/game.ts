@@ -1,19 +1,18 @@
 "use server";
-import dayjs from "@/dayjs";
 import { savedGames } from "../db/schema";
 import { db } from "../db/db";
 import { NoSessionError } from "@/lib/errors";
 import { useServerAuth } from "@/zustand/useServerAuth";
-import { DateFormat, TimezoneDefault } from "@/lib/DateFormat";
+import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { and, eq } from "drizzle-orm";
 import { getTotalScore } from "@/components/Game/utils";
 import { Dayjs } from "dayjs";
 
 const getGameTimestamp = (date: Dayjs) => {
-  return Math.floor(date.tz(TimezoneDefault).startOf("day").valueOf() / 1000);
+  return Math.floor(gameDateDate(date).startOf("day").valueOf() / 1000);
 };
 const getGameTimestampFromDate = (date: string) => {
-  return getGameTimestamp(dayjs(date, DateFormat.date));
+  return getGameTimestamp(gameDateDate(date));
 };
 
 const getGameIdFromData = ({
@@ -29,9 +28,7 @@ const getGameIdFromData = ({
 const getDataFromGameId = (gameId: string) => {
   const decoded = Buffer.from(gameId, "base64").toString("utf-8");
   const letterSet = decoded.slice(0, 7);
-  const timestamp = dayjs(Number(decoded.slice(7)) * 1000)
-    .tz(TimezoneDefault)
-    .format(DateFormat.date);
+  const timestamp = gameDateString(Number(decoded.slice(7)) * 1000);
   return { letterSet, timestamp };
 };
 
