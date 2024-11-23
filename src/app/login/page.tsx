@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 
 export default async function LoginPage() {
   const session = await auth();
-  console.log("session", session);
 
   if (session) {
     redirect("/");
