@@ -18,17 +18,17 @@ export const stagesByPercentage = [
 
 export const Stage = ({
   foundWords,
-  maxScore,
+  winningScore,
 }: {
   foundWords: string[] | null;
-  maxScore: number;
+  winningScore: number;
 }) => {
   const [showDetailedScore, setShowDetailedScore] = useState(false);
 
   const currentScore = foundWords ? getTotalScore(foundWords) : 0;
-  const currentPercentage = currentScore / maxScore;
+  const currentPercentage = currentScore / winningScore;
   const stagesByScore = stagesByPercentage.map(({ percentage, label }) => ({
-    score: Math.floor(maxScore * (Number(percentage) / 100)),
+    score: Math.floor(winningScore * (Number(percentage) / 100)),
     label,
   }));
   const currentStageIndex = stagesByScore.findLastIndex(({ score }) => {

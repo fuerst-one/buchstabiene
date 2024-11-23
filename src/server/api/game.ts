@@ -5,7 +5,7 @@ import { NoSessionError } from "@/lib/errors";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { and, eq } from "drizzle-orm";
-import { getTotalScore } from "@/components/Game/utils";
+import { getTotalScore, getWinningScore } from "@/components/Game/utils";
 import { Dayjs } from "dayjs";
 
 const getGameTimestamp = (date: Dayjs) => {
@@ -44,7 +44,7 @@ export const getGameByDate = async (date: string) => {
     return null;
   }
 
-  const { letterSet, possibleWords, maxScore } = gameDate.game;
+  const { letterSet, possibleWords } = gameDate.game;
 
   return {
     date,
@@ -52,7 +52,7 @@ export const getGameByDate = async (date: string) => {
     gameId: getGameIdFromData({ letterSet, date }),
     letterSet: letterSet.split(""),
     possibleWords: possibleWords.split(","),
-    maxScore,
+    winningScore: getWinningScore(possibleWords.split(",")),
   };
 };
 export type GameDataResponse = Awaited<ReturnType<typeof getGameByDate>>;

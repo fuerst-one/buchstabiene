@@ -132,7 +132,6 @@ export const games = pgTable("games", {
   index: serial("index").notNull().primaryKey(),
   letterSet: varchar("letter_set", { length: 7 }).unique().notNull(),
   possibleWords: text("possible_words").notNull(),
-  maxScore: integer("max_score").notNull(),
 });
 export type Game = typeof games.$inferSelect;
 export type GameInsert = typeof games.$inferInsert;

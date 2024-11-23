@@ -24,7 +24,7 @@ export const Game = ({
   user: User | null;
   gameData: GameData;
 }) => {
-  const { gameId, letterSet, possibleWords, maxScore } = gameData;
+  const { gameId, letterSet, possibleWords, winningScore } = gameData;
 
   const [foundWords, setFoundWords] = useState<string[] | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
@@ -122,7 +122,7 @@ export const Game = ({
 
   return (
     <div className="flex w-full flex-col gap-4 px-2">
-      <Stage foundWords={foundWords} maxScore={maxScore} />
+      <Stage foundWords={foundWords} winningScore={winningScore} />
       <FoundWords foundWords={foundWords} />
       <WordInput
         letterSet={letterSet}
