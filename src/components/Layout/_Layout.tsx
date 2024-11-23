@@ -10,7 +10,9 @@ export const _Layout = async ({ children }: { children: ReactNode }) => {
   return (
     <div className="flex min-h-screen flex-col justify-stretch">
       <div className="flex h-12 items-center justify-between border-b border-white/10 px-4 py-2">
-        <Link href="/">
+        <Link href="/" className="flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon.png" alt="BuchstaBiene" width={32} height={32} />
           <h1 className="text-2xl font-bold">BuchstaBiene</h1>
         </Link>
         <div className="flex items-center gap-2">
