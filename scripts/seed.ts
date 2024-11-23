@@ -1,4 +1,4 @@
-import { isPossibleWord, getMaxScore } from "@/components/Game/utils";
+import { isPossibleWord, getWinningScore } from "@/components/Game/utils";
 import { DateFormat } from "@/lib/DateFormat";
 import { readWordFile } from "@/lib/readWordFile";
 import { shuffle } from "@/lib/shuffle";
@@ -39,7 +39,7 @@ const seedGames = async (
     const letterSet = letterSets[i];
     const letters = letterSet.split("");
     const possibleWords = words.filter((word) => isPossibleWord(word, letters));
-    const maxScore = getMaxScore(possibleWords);
+    const maxScore = getWinningScore(possibleWords);
     gameValues.push({
       index: i,
       letterSet,

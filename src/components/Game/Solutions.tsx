@@ -66,7 +66,7 @@ export const Solutions = ({
       {!showSolutions ? (
         <div className="mb-8 mt-6 text-center">
           <p className="mb-2 font-semibold">
-            <TriangleAlert className="inline h-4 w-4" /> Achtung: Das Spiel wird
+            <TriangleAlert className="inline size-4" /> Achtung: Das Spiel wird
             damit beendet.
           </p>
           <p className="mb-6 text-sm">

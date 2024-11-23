@@ -1,5 +1,6 @@
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { Highscores } from "@/components/Game/Highscores";
+import { getWinningScore } from "@/components/Game/utils";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { getGameByDate, getHighscoresByDate } from "@/server/api/game";
@@ -36,7 +37,6 @@ export default async function GameByDateSolution({
   }
 
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
-  const game = gameData;
   const highscores = await getHighscoresByDate(dateString);
 
   return (
@@ -46,7 +46,7 @@ export default async function GameByDateSolution({
         <Highscores
           user={user}
           highscores={highscores}
-          maxScore={game.maxScore}
+          maxScore={getWinningScore(gameData.possibleWords)}
         />
       </Suspense>
     </>

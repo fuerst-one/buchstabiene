@@ -78,11 +78,13 @@ export const WordInput = ({
       <div className="relative mx-auto w-64 max-w-full">
         <div className="flex h-12 w-full select-none items-center justify-center rounded-sm bg-white/5 text-center text-2xl font-semibold uppercase text-white">
           {selectedLetters.join("")}
-          <span className="relative -top-0.5 text-yellow-500">|</span>
+          <span className="animate-blink relative -top-0.5 font-light text-yellow-500">
+            |
+          </span>
         </div>
         {isRevealed && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <Lock className="h-4 w-4 text-white" />
+            <Lock className="size-4 text-white" />
           </div>
         )}
         {!!message && (

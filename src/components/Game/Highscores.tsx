@@ -47,10 +47,10 @@ export const Highscores = ({
                 <span>
                   {highscore.username}{" "}
                   {idx === 0 && (
-                    <Trophy className="relative -top-0.5 inline h-4 w-4" />
+                    <Trophy className="relative -top-0.5 inline size-4" />
                   )}
                   {highscore.isRevealed && (
-                    <Lock className="relative -top-0.5 inline h-4 w-4" />
+                    <Lock className="relative -top-0.5 inline size-4" />
                   )}
                 </span>
                 <span className="font-semibold">

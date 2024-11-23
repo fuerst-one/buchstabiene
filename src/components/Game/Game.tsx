@@ -26,7 +26,7 @@ export const Game = ({
 }) => {
   const { gameId, letterSet, possibleWords, maxScore } = gameData;
 
-  const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [foundWords, setFoundWords] = useState<string[] | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
   const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(
     null,
@@ -103,14 +103,14 @@ export const Game = ({
     if (!word.includes(letterSet[0])) {
       return await flashMessage("centerMissing");
     }
-    if (foundWords.includes(word)) {
+    if (foundWords?.includes(word)) {
       return await flashMessage("duplicate");
     }
     if (!possibleWords.includes(word)) {
       return await flashMessage("notInWordList");
     }
     if (!isRevealed) {
-      const newFoundWords = [...foundWords, word];
+      const newFoundWords = [...(foundWords ?? []), word];
       onChangeFoundWords(newFoundWords);
     }
     const wordScore = getWordScore(word);

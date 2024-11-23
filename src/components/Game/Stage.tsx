@@ -20,12 +20,12 @@ export const Stage = ({
   foundWords,
   maxScore,
 }: {
-  foundWords: string[];
+  foundWords: string[] | null;
   maxScore: number;
 }) => {
   const [showDetailedScore, setShowDetailedScore] = useState(false);
 
-  const currentScore = getTotalScore(foundWords);
+  const currentScore = foundWords ? getTotalScore(foundWords) : 0;
   const currentPercentage = currentScore / maxScore;
   const stagesByScore = stagesByPercentage.map(({ percentage, label }) => ({
     score: Math.floor(maxScore * (Number(percentage) / 100)),
@@ -36,37 +36,39 @@ export const Stage = ({
       return true;
     }
   });
-  const currentStage = stagesByScore[currentStageIndex];
+  const currentStageLabel = foundWords
+    ? stagesByScore[currentStageIndex]?.label
+    : "Lädt...";
 
   return (
     <div
       className="w-full rounded-sm bg-white/10 px-2 py-1"
       onClick={() => setShowDetailedScore((prev) => !prev)}
     >
-      <div className="flex items-center gap-10">
+      <div className="flex items-center gap-4">
         <div
-          className={cn("flex items-center gap-1 font-semibold", {
+          className={cn("flex w-24 items-center gap-1", {
             "font-semibold text-yellow-500":
               currentStageIndex >= stagesByScore.length - 2,
           })}
         >
           {currentStageIndex >= stagesByScore.length - 2 && (
-            <Star className="h-4 w-4" />
+            <Star className="size-4" />
           )}
-          {currentStage?.label}
+          {currentStageLabel}
         </div>
         <div className="flex h-px flex-grow items-center justify-between bg-white/20">
           {stagesByScore.slice(1).map((stage, idx) => (
             <div
               key={stage.label}
-              className={cn(
-                "h-3 w-3 rounded-full",
-                currentStageIndex >= idx ? "bg-yellow-500" : "bg-white",
-              )}
+              className={cn("size-2.5 rounded-full md:size-3", {
+                "bg-yellow-500": currentStageIndex >= idx,
+                "bg-white": !foundWords || currentStageIndex < idx,
+              })}
             />
           ))}
         </div>
-        <div className="ml-auto mr-0 font-semibold text-yellow-500">
+        <div className="ml-auto mr-0 w-20 whitespace-nowrap text-right text-yellow-500">
           {currentScore} ({Math.round(currentPercentage * 100)}%)
         </div>
       </div>

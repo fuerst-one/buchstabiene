@@ -34,7 +34,7 @@ export const _Layout = async ({ children }: { children: ReactNode }) => {
       </div>
       {!user && (
         <div className="mb-6 flex items-center justify-center gap-2 border-y border-white/10 bg-white/10 px-2 py-1 text-sm">
-          <Info className="inline-block h-4 w-4" />
+          <Info className="inline-block size-4" />
           <span>
             <span className="font-semibold">Info:</span> Um Spiele zu speichern,
             musst du dich registrieren.

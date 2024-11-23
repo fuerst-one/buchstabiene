@@ -46,7 +46,7 @@ export const isPangram = (word: string) => {
 
 export const getWordScore = (word: string) => {
   if (word.length === 4) {
-    return 4;
+    return 1;
   }
   if (isPangram(word)) {
     return word.length + 7;
@@ -58,7 +58,7 @@ export const getTotalScore = (words: string[]) => {
   return words.reduce((acc, word) => acc + getWordScore(word), 0);
 };
 
-export const getMaxScore = (possibleWords: string[]) => {
+export const getWinningScore = (possibleWords: string[]) => {
   const filteredWords = possibleWords.filter((word) => word.length <= 7);
   return getTotalScore(filteredWords);
 };
