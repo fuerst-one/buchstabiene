@@ -69,26 +69,30 @@ export const Stage = ({
           ))}
         </div>
         <div className="ml-auto mr-0 w-20 whitespace-nowrap text-right text-yellow-500">
-          {currentScore} ({Math.round(currentPercentage * 100)}%)
+          {foundWords
+            ? `${currentScore} (${Math.round(currentPercentage * 100)}%)`
+            : "..."}
         </div>
       </div>
       {showDetailedScore && (
         <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 py-1">
-          {stagesByScore
-            .toReversed()
-            .slice(1)
-            .map(({ score, label }, idx) => (
-              <div
-                key={label}
-                className={cn("flex items-center justify-between", {
-                  "font-semibold text-yellow-500":
-                    stagesByScore.length - currentStageIndex - 2 <= idx,
-                })}
-              >
-                <span>{label}</span>
-                <span>{score}</span>
-              </div>
-            ))}
+          {!!foundWords
+            ? stagesByScore
+                .toReversed()
+                .slice(1)
+                .map(({ score, label }, idx) => (
+                  <div
+                    key={label}
+                    className={cn("flex items-center justify-between", {
+                      "font-semibold text-yellow-500":
+                        stagesByScore.length - currentStageIndex - 2 <= idx,
+                    })}
+                  >
+                    <span>{label}</span>
+                    <span>{score}</span>
+                  </div>
+                ))
+            : "..."}
         </div>
       )}
     </div>
