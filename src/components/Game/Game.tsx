@@ -47,7 +47,8 @@ export const Game = ({
         }
         savedState = JSON.parse(savedStateContent) as SaveState;
       }
-      if (savedState?.gameId !== gameId) {
+      if (!savedState || savedState.gameId !== gameId) {
+        setFoundWords([]);
         return;
       }
       setIsRevealed(savedState.solutionsRevealed);
