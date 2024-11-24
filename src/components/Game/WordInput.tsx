@@ -22,7 +22,7 @@ export const WordInput = ({
   const [otherLetters, setOtherLetters] = useState(letterSet.slice(1));
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
 
-  const addLetter = useCallback((letter: string) => {
+  const addSelectedLetter = useCallback((letter: string) => {
     setSelectedLetters((prev) => [...prev, letter]);
   }, []);
 
@@ -48,7 +48,7 @@ export const WordInput = ({
       }
       const key = event.key.toLowerCase();
       if (letterSet.includes(key)) {
-        addLetter(event.key);
+        addSelectedLetter(event.key);
       } else if (key === "backspace") {
         if (event.ctrlKey || event.altKey) {
           setSelectedLetters([]);
@@ -59,18 +59,21 @@ export const WordInput = ({
         handleSubmit();
       }
     },
-    [addLetter, deleteLetter, handleSubmit],
+    [addSelectedLetter, deleteLetter, handleSubmit],
   );
 
   const LetterButton = useCallback(
     ({ letter, className }: { letter: string; className?: string }) => {
       return (
-        <HexagonButton className={className} onClick={() => addLetter(letter)}>
+        <HexagonButton
+          className={className}
+          onClick={() => addSelectedLetter(letter)}
+        >
           {letter}
         </HexagonButton>
       );
     },
-    [addLetter],
+    [addSelectedLetter],
   );
 
   return (
@@ -131,13 +134,19 @@ export const WordInput = ({
 };
 
 const HexagonButton = (props: ComponentProps<"button">) => {
+  const [isActive, setIsActive] = useState(false);
   return (
     <button
       {...props}
       className={cn(
-        "h-[5rem] w-[6rem] rounded-sm bg-white/20 text-2xl font-bold uppercase text-white",
+        "h-[5rem] w-[6rem] select-none rounded-sm bg-white/20 text-2xl font-bold uppercase text-white",
+        { "scale-90": isActive },
         props.className,
       )}
+      onPointerDown={() => setIsActive(true)}
+      onPointerUp={() => setIsActive(false)}
+      onPointerLeave={() => setIsActive(false)}
+      onFocus={(event) => event.target.blur()}
       style={{
         clipPath:
           "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
