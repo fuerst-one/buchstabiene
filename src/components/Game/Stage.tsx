@@ -81,15 +81,25 @@ export const Stage = ({
                 .toReversed()
                 .slice(1)
                 .map(({ score, label }, idx) => (
-                  <div
-                    key={label}
-                    className={cn("flex items-center justify-between", {
-                      "font-semibold text-yellow-500":
-                        stagesByScore.length - currentStageIndex - 2 <= idx,
-                    })}
-                  >
-                    <span>{label}</span>
-                    <span>{score}</span>
+                  <div key={label}>
+                    <div
+                      className={cn("flex items-center justify-between", {
+                        "font-semibold text-yellow-500":
+                          stagesByScore.length - currentStageIndex - 2 <= idx,
+                      })}
+                    >
+                      <span>{label}</span>
+                      <span>{score}</span>
+                    </div>
+                    {stagesByScore.length - currentStageIndex - 3 === idx && (
+                      <p className="border-b border-white/20 pb-1 text-right text-xs">
+                        Noch {score - currentScore} Punkte bis zur nächsten
+                        Stufe{" "}
+                        <span className="text-yellow-500">
+                          ({currentScore})
+                        </span>
+                      </p>
+                    )}
                   </div>
                 ))
             : "..."}
