@@ -3,11 +3,26 @@ import React, { useEffect, useState } from "react";
 import { GameData, updateSavedGame } from "@/server/api/game";
 import { getSavedGame } from "@/server/api/game";
 import { User } from "@/server/db/schema";
-import { getWordScore, Message, messages, MessageType } from "./utils";
+import {
+  getTotalScore,
+  getWordScore,
+  Message,
+  messages,
+  MessageType,
+} from "./utils";
 import { Stage } from "./Stage";
 import { FoundWords } from "./FoundWords";
 import { isPangram } from "./utils";
 import { WordInput } from "./WordInput";
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Star } from "lucide-react";
 
 export const SAVE_STATE_LOCAL_STORAGE_KEY = "spelling-bee-save-state";
 
@@ -31,6 +46,7 @@ export const Game = ({
   const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const [showWinningDialog, setShowWinningDialog] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
 
   useEffect(() => {
@@ -110,19 +126,47 @@ export const Game = ({
     if (!possibleWords.includes(word)) {
       return await flashMessage("notInWordList");
     }
+    const newFoundWords = [...(foundWords ?? []), word];
     if (!isRevealed) {
-      const newFoundWords = [...(foundWords ?? []), word];
       onChangeFoundWords(newFoundWords);
     }
     const wordScore = getWordScore(word);
     if (isPangram(word)) {
-      return await flashMessage("pangram", wordScore);
+      await flashMessage("pangram", wordScore);
+    } else {
+      await flashMessage("correct", wordScore);
     }
-    return await flashMessage("correct", wordScore);
+    if (getTotalScore(newFoundWords) >= winningScore) {
+      setTimeout(() => {
+        setShowWinningDialog(true);
+      }, 1000);
+    }
   };
 
   return (
     <div className="flex w-full flex-col gap-4 px-2">
+      {showWinningDialog && (
+        <Dialog open={showWinningDialog} onOpenChange={setShowWinningDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                <Star className="relative -top-0.5 mr-2 inline size-5" />
+                Spiel geschafft!
+              </DialogTitle>
+            </DialogHeader>
+            <p>
+              Herzlichen Glückwunsch, du hast die höchste Stufe für heute
+              erreicht. Du kannst trotzdem weiter Wörter suchen, Punkte sammeln
+              und versuchen die 100% zu erreichen.
+            </p>
+            <DialogFooter>
+              <Button type="submit" onClick={() => setShowWinningDialog(false)}>
+                Schließen
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
       <Stage foundWords={foundWords} winningScore={winningScore} />
       <FoundWords foundWords={foundWords} />
       <WordInput
