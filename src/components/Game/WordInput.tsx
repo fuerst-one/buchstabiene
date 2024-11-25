@@ -20,10 +20,10 @@ export const WordInput = ({
 }) => {
   const mainLetter = letterSet[0];
   const [otherLetters, setOtherLetters] = useState(letterSet.slice(1));
-  const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
+  const [selectedLetters, setSelectedLetters] = useState<string>("");
 
   const addSelectedLetter = useCallback((letter: string) => {
-    setSelectedLetters((prev) => [...prev, letter]);
+    setSelectedLetters((prev) => prev + letter);
   }, []);
 
   const shuffleLetters = useCallback(() => {
@@ -35,8 +35,8 @@ export const WordInput = ({
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    await onSubmit(selectedLetters.join(""));
-    setSelectedLetters([]);
+    await onSubmit(selectedLetters);
+    setSelectedLetters("");
   }, [selectedLetters, onSubmit]);
 
   useWindowEventListener(
@@ -44,14 +44,14 @@ export const WordInput = ({
     (event) => {
       if (message) {
         onCancelMessage();
-        setSelectedLetters([]);
+        setSelectedLetters("");
       }
       const key = event.key.toLowerCase();
       if (letterSet.includes(key)) {
         addSelectedLetter(event.key);
       } else if (key === "backspace") {
         if (event.ctrlKey || event.altKey) {
-          setSelectedLetters([]);
+          setSelectedLetters("");
         } else {
           deleteLetter();
         }
@@ -80,7 +80,7 @@ export const WordInput = ({
     <div className="mt-6 flex flex-col gap-8">
       <div className="relative mx-auto w-64 max-w-full">
         <div className="flex h-12 w-full select-none items-center justify-center rounded-sm bg-white/5 text-center text-2xl font-semibold uppercase text-white">
-          {selectedLetters.map((letter, idx) => (
+          {selectedLetters.split("").map((letter, idx) => (
             <span
               key={idx}
               className={cn({ "text-yellow-500": letter === mainLetter })}

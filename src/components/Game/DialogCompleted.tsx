@@ -16,7 +16,6 @@ export const DialogCompleted = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
-  if (!open) return null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">

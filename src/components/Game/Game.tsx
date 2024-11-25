@@ -130,10 +130,13 @@ export const Game = ({
     } else {
       await flashMessage("correct", wordScore);
     }
-    if (getTotalScore(newFoundWords) >= winningScore) {
-      setTimeout(() => {
-        setShowWinningDialog(true);
-      }, 1000);
+    const oldScore = getTotalScore(foundWords ?? []);
+    const newScore = getTotalScore(newFoundWords);
+    if (oldScore < winningScore && newScore >= winningScore) {
+      setShowWinningDialog(true);
+    }
+    if (newFoundWords.length === possibleWords.length) {
+      setShowCompletedDialog(true);
     }
   };
 
