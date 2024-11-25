@@ -12,6 +12,7 @@ export const FoundWords = ({
   possibleWords: string[];
 }) => {
   const [showAllFoundWords, setShowAllFoundWords] = useState(false);
+  const wordsLeft = possibleWords.length - (foundWords?.length ?? 0);
 
   return (
     <div
@@ -64,10 +65,15 @@ export const FoundWords = ({
               </div>
             ))}
           </div>
-          <p className="mt-1 text-center text-xs">
-            Noch {possibleWords.length - (foundWords?.length ?? 0)} Wörter
-            möglich
-          </p>
+          {wordsLeft ? (
+            <p className="mt-1 text-center text-xs">
+              Noch {wordsLeft} Wörter möglich
+            </p>
+          ) : (
+            <p className="mt-1 text-center text-xs text-yellow-500">
+              Alle Wörter für heute gefunden, Gratulation!
+            </p>
+          )}
         </div>
       )}
     </div>

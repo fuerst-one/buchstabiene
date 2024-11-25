@@ -14,15 +14,8 @@ import { Stage } from "./Stage";
 import { FoundWords } from "./FoundWords";
 import { isPangram } from "./utils";
 import { WordInput } from "./WordInput";
-import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import { Star } from "lucide-react";
+import { DialogWinner } from "./DialogWinner";
+import { DialogCompleted } from "./DialogCompleted";
 
 export const SAVE_STATE_LOCAL_STORAGE_KEY = "spelling-bee-save-state";
 
@@ -47,6 +40,7 @@ export const Game = ({
     null,
   );
   const [showWinningDialog, setShowWinningDialog] = useState(false);
+  const [showCompletedDialog, setShowCompletedDialog] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
 
   useEffect(() => {
@@ -145,28 +139,14 @@ export const Game = ({
 
   return (
     <div className="flex w-full flex-col gap-4 px-2">
-      {showWinningDialog && (
-        <Dialog open={showWinningDialog} onOpenChange={setShowWinningDialog}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                <Star className="relative -top-0.5 mr-2 inline size-5" />
-                Spiel geschafft!
-              </DialogTitle>
-            </DialogHeader>
-            <p>
-              Herzlichen Glückwunsch, du hast die höchste Stufe für heute
-              erreicht. Du kannst trotzdem weiter Wörter suchen, Punkte sammeln
-              und versuchen die 100% zu erreichen.
-            </p>
-            <DialogFooter>
-              <Button type="submit" onClick={() => setShowWinningDialog(false)}>
-                Schließen
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <DialogWinner
+        open={showWinningDialog}
+        onOpenChange={setShowWinningDialog}
+      />
+      <DialogCompleted
+        open={showCompletedDialog}
+        onOpenChange={setShowCompletedDialog}
+      />
       <Stage foundWords={foundWords} winningScore={winningScore} />
       <FoundWords foundWords={foundWords} possibleWords={possibleWords} />
       <WordInput
