@@ -168,7 +168,7 @@ export const Game = ({
         </Dialog>
       )}
       <Stage foundWords={foundWords} winningScore={winningScore} />
-      <FoundWords foundWords={foundWords} />
+      <FoundWords foundWords={foundWords} possibleWords={possibleWords} />
       <WordInput
         letterSet={letterSet}
         message={message}

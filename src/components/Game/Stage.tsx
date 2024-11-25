@@ -1,7 +1,7 @@
 "use client";
 import { getTotalScore } from "./utils";
 import { cn } from "@/lib/utils";
-import { Star } from "lucide-react";
+import { ChevronDown, Star } from "lucide-react";
 import { useState } from "react";
 
 export const stagesByPercentage = [
@@ -12,7 +12,7 @@ export const stagesByPercentage = [
   { percentage: 20, label: "Gut" },
   { percentage: 25, label: "Stark" },
   { percentage: 50, label: "Unglaublich" },
-  { percentage: 75, label: "Genial" },
+  { percentage: 75, label: "Genie" },
   { percentage: 99, label: "Bienenkönig:in" },
 ];
 
@@ -26,7 +26,6 @@ export const Stage = ({
   const [showDetailedScore, setShowDetailedScore] = useState(false);
 
   const currentScore = foundWords ? getTotalScore(foundWords) : 0;
-  const currentPercentage = currentScore / winningScore;
   const stagesByScore = stagesByPercentage.map(({ percentage, label }) => ({
     score: Math.floor(winningScore * (Number(percentage) / 100)),
     label,
@@ -52,27 +51,37 @@ export const Stage = ({
               currentStageIndex >= stagesByScore.length - 2,
           })}
         >
+          {currentStageLabel}
           {currentStageIndex >= stagesByScore.length - 2 && (
             <Star className="size-4" />
           )}
-          {currentStageLabel}
         </div>
-        <div className="flex h-px flex-grow items-center justify-between bg-white/20">
+        <div className="mr-2 flex h-px flex-grow items-center justify-between bg-white/20">
           {stagesByScore.slice(1).map((stage, idx) => (
             <div
               key={stage.label}
-              className={cn("size-2.5 rounded-full md:size-3", {
-                "bg-yellow-500": currentStageIndex >= idx,
-                "bg-white": !foundWords || currentStageIndex < idx,
-              })}
-            />
+              className={cn(
+                {
+                  "bg-yellow-500": currentStageIndex >= idx,
+                  "bg-white": !foundWords || currentStageIndex < idx,
+                  "rounded-full": idx < stagesByScore.length - 2,
+                },
+                currentStageIndex === idx
+                  ? "flex size-[1.6rem] items-center justify-center font-semibold text-black"
+                  : "size-2.5 md:size-3",
+              )}
+            >
+              {currentStageIndex === idx && (
+                <span className="text-xs">{currentScore}</span>
+              )}
+            </div>
           ))}
         </div>
-        <div className="ml-auto mr-0 w-20 whitespace-nowrap text-right text-yellow-500">
-          {foundWords
-            ? `${currentScore} (${Math.round(currentPercentage * 100)}%)`
-            : "..."}
-        </div>
+        <ChevronDown
+          className={cn("ml-1 size-4 shrink-0", {
+            "rotate-180": showDetailedScore,
+          })}
+        />
       </div>
       {showDetailedScore && (
         <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 py-1">
@@ -84,7 +93,7 @@ export const Stage = ({
                   <div key={label}>
                     <div
                       className={cn("flex items-center justify-between", {
-                        "font-semibold text-yellow-500":
+                        "text-yellow-500":
                           stagesByScore.length - currentStageIndex - 2 <= idx,
                       })}
                     >
@@ -92,11 +101,10 @@ export const Stage = ({
                       <span>{score}</span>
                     </div>
                     {stagesByScore.length - currentStageIndex - 3 === idx && (
-                      <p className="border-b border-white/20 pb-1 text-right text-xs">
-                        Noch {score - currentScore} Punkte bis zur nächsten
-                        Stufe{" "}
+                      <p className="my-1 border-b border-white/20 pb-1 pr-0.5 text-right text-xs font-semibold">
+                        Punkte bis zur nächsten Stufe:{" "}
                         <span className="text-yellow-500">
-                          ({currentScore})
+                          {score - currentScore}
                         </span>
                       </p>
                     )}

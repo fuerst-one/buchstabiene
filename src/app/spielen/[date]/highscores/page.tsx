@@ -46,7 +46,7 @@ export default async function GameByDateSolution({
         <Highscores
           user={user}
           highscores={highscores}
-          maxScore={getWinningScore(gameData.possibleWords)}
+          winningScore={getWinningScore(gameData.possibleWords)}
         />
       </Suspense>
     </>

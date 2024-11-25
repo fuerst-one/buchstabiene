@@ -21,40 +21,41 @@ const getStageByScore = (currentScore: number, maxScore: number) => {
 export const Highscores = ({
   user,
   highscores,
-  maxScore,
+  winningScore,
 }: {
   user: User | null;
   highscores: Highscore[];
-  maxScore: number;
+  winningScore: number;
 }) => {
+  const maxScore = Math.max(...highscores.map((highscore) => highscore.score));
+
   return (
     <div className="w-full rounded-sm bg-white/10 p-2">
       {highscores.length ? (
         <div className="space-y-1">
           {highscores
             .toSorted((a, b) => b.score - a.score)
-            .map((highscore, idx) => (
+            .map((highscore) => (
               <div
                 key={highscore.username}
                 className={cn(
-                  "flex items-center justify-between whitespace-nowrap px-1 leading-7 text-white",
-                  {
-                    "rounded-sm bg-yellow-500/30 font-bold":
-                      highscore.username === user?.name,
-                  },
+                  "flex items-center justify-between whitespace-nowrap rounded-sm px-1 leading-7 text-white",
+                  highscore.username === user?.name
+                    ? "bg-yellow-500/30"
+                    : "odd:bg-white/5",
                 )}
               >
                 <span>
                   {highscore.username}{" "}
-                  {idx === 0 && (
+                  {highscore.score === maxScore && (
                     <Trophy className="relative -top-0.5 inline size-4" />
                   )}
                   {highscore.isRevealed && (
                     <Lock className="relative -top-0.5 inline size-4" />
                   )}
                 </span>
-                <span className="font-semibold">
-                  {getStageByScore(highscore.score, maxScore).label} -{" "}
+                <span>
+                  {getStageByScore(highscore.score, winningScore).label} -{" "}
                   {highscore.foundWords.length} Wörter - {highscore.score}{" "}
                   Punkte
                 </span>

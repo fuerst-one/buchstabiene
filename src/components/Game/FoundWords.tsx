@@ -4,7 +4,13 @@ import { capitalize, cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-export const FoundWords = ({ foundWords }: { foundWords: string[] | null }) => {
+export const FoundWords = ({
+  foundWords,
+  possibleWords,
+}: {
+  foundWords: string[] | null;
+  possibleWords: string[];
+}) => {
   const [showAllFoundWords, setShowAllFoundWords] = useState(false);
 
   return (
@@ -16,7 +22,7 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] | null }) => {
         <div className="max-w-full overflow-hidden text-clip whitespace-nowrap text-white">
           {foundWords
             ?.toReversed()
-            .slice(0, 5)
+            .slice(0, 10)
             .map((word) => (
               <span key={word} className={cn({ "font-bold": isPangram(word) })}>
                 {capitalize(word)}
@@ -28,7 +34,7 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] | null }) => {
           {foundWords ? (
             <>
               {foundWords && foundWords.length > 5 ? "..." : ""} (
-              {foundWords?.length})
+              {foundWords?.length} Wörter)
             </>
           ) : (
             "Lädt..."
@@ -58,6 +64,10 @@ export const FoundWords = ({ foundWords }: { foundWords: string[] | null }) => {
               </div>
             ))}
           </div>
+          <p className="mt-1 text-center text-xs">
+            Noch {possibleWords.length - (foundWords?.length ?? 0)} Wörter
+            möglich
+          </p>
         </div>
       )}
     </div>
