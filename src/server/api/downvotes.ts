@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/server/db/db";
 import { useServerAuth } from "@/zustand/useServerAuth";
-import { downvotes } from "../db/schema";
+import { wordDownvotes } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -10,7 +10,7 @@ export const adminGetDownvotes = async () => {
   if (!session?.user.isAdmin) {
     return [];
   }
-  return await db.query.downvotes.findMany();
+  return await db.query.wordDownvotes.findMany();
 };
 
 export const userGetDownvotes = async () => {
@@ -18,8 +18,8 @@ export const userGetDownvotes = async () => {
   if (!session?.user) {
     return [];
   }
-  return await db.query.downvotes.findMany({
-    where: eq(downvotes.userId, session.user.id),
+  return await db.query.wordDownvotes.findMany({
+    where: eq(wordDownvotes.userId, session.user.id),
   });
 };
 
@@ -29,7 +29,7 @@ export const userAddDownvote = async (word: string) => {
     return;
   }
   const inserted = await db
-    .insert(downvotes)
+    .insert(wordDownvotes)
     .values({ userId: session.user.id, word })
     .returning();
   revalidatePath(`/spielen/[date]`, "page");
@@ -42,8 +42,13 @@ export const userDeleteDownvote = async (word: string) => {
     return;
   }
   const deleted = await db
-    .delete(downvotes)
-    .where(and(eq(downvotes.userId, session.user.id), eq(downvotes.word, word)))
+    .delete(wordDownvotes)
+    .where(
+      and(
+        eq(wordDownvotes.userId, session.user.id),
+        eq(wordDownvotes.word, word),
+      ),
+    )
     .returning();
   revalidatePath(`/spielen/[date]`, "page");
   return deleted.length > 0;
@@ -55,8 +60,8 @@ export const adminDeleteDownvote = async (word: string) => {
     return;
   }
   const deleted = await db
-    .delete(downvotes)
-    .where(eq(downvotes.word, word))
+    .delete(wordDownvotes)
+    .where(eq(wordDownvotes.word, word))
     .returning();
   revalidatePath(`/admin`, "page");
   revalidatePath(`/spielen/[date]`, "page");
