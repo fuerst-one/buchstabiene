@@ -1,6 +1,6 @@
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { Highscores } from "@/components/Game/Highscores";
-import { getWinningScore } from "@/components/Game/utils";
+import { getTotalScore, getWinningScore } from "@/components/Game/utils";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { getGameByDate, getHighscoresByDate } from "@/server/api/game";
@@ -47,6 +47,7 @@ export default async function GameByDateSolution({
           user={user}
           highscores={highscores}
           winningScore={getWinningScore(gameData.possibleWords)}
+          completedScore={getTotalScore(gameData.possibleWords)}
         />
       </Suspense>
     </>

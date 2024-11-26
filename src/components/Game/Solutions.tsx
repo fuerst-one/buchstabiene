@@ -9,7 +9,7 @@ import { SAVE_STATE_LOCAL_STORAGE_KEY } from "./Game";
 import { SaveState } from "./Game";
 import { Button } from "../ui/button";
 import { ThumbsDown, TriangleAlert } from "lucide-react";
-import { userAddDownvote, userDeleteDownvote } from "@/server/api/downvotes";
+import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
 
 export const Solutions = ({
   user,
@@ -123,8 +123,8 @@ export const Solutions = ({
                         className="size-4"
                         onClick={() =>
                           downvotes.includes(word)
-                            ? userDeleteDownvote(word)
-                            : userAddDownvote(word)
+                            ? userDeleteWordVote(word)
+                            : userAddWordVote(word)
                         }
                       />
                     </span>

@@ -154,15 +154,16 @@ export const gameDateRelations = relations(gameDates, ({ one }) => ({
   }),
 }));
 
-export const wordDownvotes = pgTable("word_downvotes", {
+export const wordVotes = pgTable("word_votes", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id),
   word: varchar("word", { length: 64 }).notNull(),
+  vote: integer("vote").notNull().default(0),
 });
-export type WordDownvote = typeof wordDownvotes.$inferSelect;
-export type WordDownvoteInsert = typeof wordDownvotes.$inferInsert;
-export const wordDownvoteSchema = createSelectSchema(wordDownvotes);
+export type WordVote = typeof wordVotes.$inferSelect;
+export type WordVoteInsert = typeof wordVotes.$inferInsert;
+export const wordVoteSchema = createSelectSchema(wordVotes);
 
 export const schema = {
   users,
@@ -176,7 +177,7 @@ export const schema = {
   games,
   gameDates,
   gameDateRelations,
-  wordDownvotes,
+  wordVotes,
 };
 
 export const tables = [
@@ -188,5 +189,5 @@ export const tables = [
   "savedGames",
   "games",
   "gameDates",
-  "wordDownvotes",
+  "wordVotes",
 ] as const;

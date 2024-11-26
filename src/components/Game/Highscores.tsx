@@ -5,9 +5,19 @@ import { User } from "@/server/db/schema";
 import { Lock, Trophy } from "lucide-react";
 import { stagesByPercentage } from "./Stage";
 
-const getStageByScore = (currentScore: number, maxScore: number) => {
+const getStageByScore = (
+  currentScore: number,
+  winningScore: number,
+  completedScore: number,
+) => {
+  if (currentScore >= completedScore) {
+    return {
+      score: completedScore,
+      label: "Bienenkönig:in",
+    };
+  }
   const stagesByScore = stagesByPercentage.map(({ percentage, label }) => ({
-    score: Math.floor(maxScore * (Number(percentage) / 100)),
+    score: Math.floor(winningScore * (Number(percentage) / 100)),
     label,
   }));
   const currentStageIndex = stagesByScore.findLastIndex(({ score }) => {
@@ -22,12 +32,16 @@ export const Highscores = ({
   user,
   highscores,
   winningScore,
+  completedScore,
 }: {
   user: User | null;
   highscores: Highscore[];
   winningScore: number;
+  completedScore: number;
 }) => {
-  const maxScore = Math.max(...highscores.map((highscore) => highscore.score));
+  const highestScore = Math.max(
+    ...highscores.map((highscore) => highscore.score),
+  );
 
   return (
     <div className="w-full px-2">
@@ -48,7 +62,7 @@ export const Highscores = ({
                 >
                   <span>
                     {highscore.username}{" "}
-                    {highscore.score === maxScore && (
+                    {highscore.score === highestScore && (
                       <Trophy className="relative -top-0.5 inline size-4" />
                     )}
                     {highscore.isRevealed && (
@@ -56,8 +70,14 @@ export const Highscores = ({
                     )}
                   </span>
                   <span>
-                    {getStageByScore(highscore.score, winningScore).label} -{" "}
-                    {highscore.foundWords.length} Wörter - {highscore.score}{" "}
+                    {
+                      getStageByScore(
+                        highscore.score,
+                        winningScore,
+                        completedScore,
+                      ).label
+                    }{" "}
+                    - {highscore.foundWords.length} Wörter - {highscore.score}{" "}
                     Punkte
                   </span>
                 </div>

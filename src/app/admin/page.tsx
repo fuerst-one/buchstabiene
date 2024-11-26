@@ -1,7 +1,7 @@
-import { adminGetDownvotes } from "@/server/api/downvotes";
+import { adminGetWordVotes } from "@/server/api/wordVotes";
 
 export default async function AdminPage() {
-  const downvotes = await adminGetDownvotes();
+  const downvotes = await adminGetWordVotes();
 
   const downvotesByWord = Object.entries(
     downvotes.reduce(

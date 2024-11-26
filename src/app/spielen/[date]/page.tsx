@@ -2,7 +2,7 @@ import { Game } from "@/components/Game/Game";
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
-import { userGetDownvotes } from "@/server/api/downvotes";
+import { userGetWordVotes } from "@/server/api/wordVotes";
 import { getGameByDate } from "@/server/api/game";
 import { useServerAuth } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
@@ -37,7 +37,7 @@ export default async function GameByDate({
   }
 
   const user = (await useServerAuth.getState().getSession())?.user ?? null;
-  const downvotes = (await userGetDownvotes()).map((downvote) => downvote.word);
+  const downvotes = (await userGetWordVotes()).map((downvote) => downvote.word);
 
   return (
     <>
