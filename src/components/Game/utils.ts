@@ -54,8 +54,8 @@ export const getWordScore = (word: string) => {
   return word.length;
 };
 
-export const getTotalScore = (words: string[]) => {
-  return words.reduce((acc, word) => acc + getWordScore(word), 0);
+export const getTotalScore = (words?: string[] | null) => {
+  return words?.reduce((acc, word) => acc + getWordScore(word), 0) ?? 0;
 };
 
 export const getWinningScore = (possibleWords: string[]) => {

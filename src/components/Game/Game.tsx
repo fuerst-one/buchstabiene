@@ -122,18 +122,22 @@ export const Game = ({
     if (!possibleWords.includes(word)) {
       return await flashMessage("notInWordList");
     }
-    const newFoundWords = [...(foundWords ?? []), word];
+
+    const oldFoundWords = foundWords ?? [];
+    const newFoundWords = [...oldFoundWords, word];
     if (!isRevealed) {
       onChangeFoundWords(newFoundWords);
     }
+
     const wordScore = getWordScore(word);
     if (isPangram(word)) {
       await flashMessage("pangram", wordScore);
     } else {
       await flashMessage("correct", wordScore);
     }
-    const oldScore = getTotalScore(foundWords ?? []);
-    const newScore = getTotalScore(newFoundWords);
+
+    const oldScore = getTotalScore(oldFoundWords);
+    const newScore = oldScore + wordScore;
     if (oldScore < winningScore && newScore >= winningScore) {
       setShowWinningDialog(true);
     }
@@ -152,7 +156,11 @@ export const Game = ({
         open={showCompletedDialog}
         onOpenChange={setShowCompletedDialog}
       />
-      <Stage foundWords={foundWords} winningScore={winningScore} />
+      <Stage
+        foundWords={foundWords}
+        winningScore={winningScore}
+        completed={foundWords?.length === possibleWords.length}
+      />
       <FoundWords
         foundWords={foundWords}
         possibleWords={possibleWords}

@@ -8,16 +8,19 @@ import { useState } from "react";
 import { SAVE_STATE_LOCAL_STORAGE_KEY } from "./Game";
 import { SaveState } from "./Game";
 import { Button } from "../ui/button";
-import { TriangleAlert } from "lucide-react";
+import { ThumbsDown, TriangleAlert } from "lucide-react";
+import { userAddDownvote, userDeleteDownvote } from "@/server/api/downvotes";
 
 export const Solutions = ({
   user,
   gameId,
   possibleWords,
+  downvotes,
 }: {
   user: User | null;
   gameId: string;
   possibleWords: string[];
+  downvotes: string[];
 }) => {
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [showSolutions, setShowSolutions] = useState(false);
@@ -94,7 +97,7 @@ export const Solutions = ({
                   <div
                     key={word}
                     className={cn(
-                      "whitespace-nowrap px-1 leading-7 text-white",
+                      "flex w-1/2 items-center gap-1 whitespace-nowrap px-1 leading-7 text-white",
                       {
                         "font-bold": isPangram(word),
                         "rounded-sm bg-yellow-500/30":
@@ -102,9 +105,28 @@ export const Solutions = ({
                       },
                     )}
                   >
-                    {capitalize(word)}{" "}
+                    <span>{capitalize(word)}</span>
                     <span className="text-white/50">
                       ({getWordScore(word)})
+                    </span>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className={cn(
+                        downvotes.includes(word)
+                          ? "text-red-500"
+                          : "text-red-500/50",
+                      )}
+                    >
+                      <ThumbsDown
+                        className="size-4"
+                        onClick={() =>
+                          downvotes.includes(word)
+                            ? userDeleteDownvote(word)
+                            : userAddDownvote(word)
+                        }
+                      />
                     </span>
                   </div>
                 ))}
