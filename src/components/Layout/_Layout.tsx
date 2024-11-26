@@ -18,9 +18,14 @@ export const _Layout = async ({ children }: { children: ReactNode }) => {
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <div className="hidden text-sm lg:inline">
-                Eingeloggt als {user.name}
-              </div>
+              <div className="hidden text-sm lg:inline">{user.name}</div>
+              {user.isAdmin && (
+                <Link href="/admin">
+                  <Button variant="outline" size="sm">
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <LogoutButton>Logout</LogoutButton>
             </>
           ) : (

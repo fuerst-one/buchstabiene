@@ -7,6 +7,7 @@ import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { and, eq } from "drizzle-orm";
 import { getTotalScore, getWinningScore } from "@/components/Game/utils";
 import { Dayjs } from "dayjs";
+import { revalidatePath } from "next/cache";
 
 const getGameTimestamp = (date: Dayjs) => {
   return Math.floor(gameDateDate(date).startOf("day").valueOf() / 1000);
@@ -66,7 +67,7 @@ export const updateSavedGame = async (gameId: string, foundWords: string[]) => {
     throw new NoSessionError();
   }
 
-  await db
+  const inserted = await db
     .insert(savedGames)
     .values({
       gameId,
@@ -76,7 +77,10 @@ export const updateSavedGame = async (gameId: string, foundWords: string[]) => {
     .onConflictDoUpdate({
       target: [savedGames.gameId, savedGames.userId],
       set: { foundWords },
-    });
+    })
+    .returning();
+  revalidatePath(`/spielen/[date]`, "page");
+  return inserted.length > 0;
 };
 
 export const revealSolutionsForUser = async (gameId: string) => {
@@ -87,10 +91,13 @@ export const revealSolutionsForUser = async (gameId: string) => {
     throw new NoSessionError();
   }
 
-  await db
+  const updated = await db
     .update(savedGames)
     .set({ solutionsRevealed: true })
-    .where(and(eq(savedGames.gameId, gameId), eq(savedGames.userId, userId)));
+    .where(and(eq(savedGames.gameId, gameId), eq(savedGames.userId, userId)))
+    .returning();
+  revalidatePath(`/spielen/[date]`, "page");
+  return updated.length > 0;
 };
 
 export const getSavedGame = async (gameId: string) => {
@@ -148,9 +155,4 @@ export const getHighscoresByDate = async (date: string) => {
   return highscores;
 };
 
-export type Highscore = {
-  username: string;
-  foundWords: string[];
-  isRevealed: boolean;
-  score: number;
-};
+export type Highscore = Awaited<ReturnType<typeof getHighscoresByDate>>[number];

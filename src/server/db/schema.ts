@@ -154,6 +154,13 @@ export const gameDateRelations = relations(gameDates, ({ one }) => ({
   }),
 }));
 
+export const downvotes = pgTable("downvotes", {
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  word: varchar("word", { length: 64 }).notNull(),
+});
+
 export const schema = {
   users,
   userRelations,
@@ -166,6 +173,7 @@ export const schema = {
   games,
   gameDates,
   gameDateRelations,
+  downvotes,
 };
 
 export const tables = [
@@ -177,4 +185,5 @@ export const tables = [
   "savedGames",
   "games",
   "gameDates",
+  "downvotes",
 ] as const;

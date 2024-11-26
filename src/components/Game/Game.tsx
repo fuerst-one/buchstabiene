@@ -28,9 +28,11 @@ export type SaveState = {
 export const Game = ({
   user,
   gameData,
+  downvotes,
 }: {
   user: User | null;
   gameData: GameData;
+  downvotes: string[];
 }) => {
   const { gameId, letterSet, possibleWords, winningScore } = gameData;
 
@@ -151,7 +153,11 @@ export const Game = ({
         onOpenChange={setShowCompletedDialog}
       />
       <Stage foundWords={foundWords} winningScore={winningScore} />
-      <FoundWords foundWords={foundWords} possibleWords={possibleWords} />
+      <FoundWords
+        foundWords={foundWords}
+        possibleWords={possibleWords}
+        downvotes={downvotes}
+      />
       <WordInput
         letterSet={letterSet}
         message={message}

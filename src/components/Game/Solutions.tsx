@@ -62,49 +62,57 @@ export const Solutions = ({
   };
 
   return (
-    <div className="w-full rounded-sm bg-white/10 px-2 py-1">
-      {!showSolutions ? (
-        <div className="mb-8 mt-6 text-center">
-          <p className="mb-2 font-semibold">
-            <TriangleAlert className="inline size-4" /> Achtung: Das Spiel wird
-            damit beendet.
-          </p>
-          <p className="mb-6 text-sm">
-            Du kannst weiterhin Wörter suchen, aber deine Punkte werden nicht
-            mehr aktualisiert.
-          </p>
-          <Button onClick={revealSolutions} size="lg">
-            Lösungen anzeigen
-          </Button>
-        </div>
-      ) : (
-        <>
-          <div className="flex items-center justify-between">
-            <div className="max-w-full overflow-hidden text-clip whitespace-nowrap px-1 text-white">
-              {foundWords.toReversed().slice(0, 5).map(capitalize).join(", ")}
-            </div>
-            <span className="ml-0 mr-auto whitespace-nowrap text-white/50">
-              {foundWords.length > 5 ? "..." : ""} ({foundWords.length})
-            </span>
+    <div className="w-full px-2">
+      <div className="w-full rounded-sm bg-white/10 px-2 py-1">
+        {!showSolutions ? (
+          <div className="mb-8 mt-6 text-center">
+            <p className="mb-2 font-semibold">
+              <TriangleAlert className="inline size-4" /> Achtung: Das Spiel
+              wird damit beendet.
+            </p>
+            <p className="mb-6 text-sm">
+              Du kannst weiterhin Wörter suchen, aber deine Punkte werden nicht
+              mehr aktualisiert.
+            </p>
+            <Button onClick={revealSolutions} size="lg">
+              Lösungen anzeigen
+            </Button>
           </div>
-          <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 pb-3 pt-1">
-            <div className="columns-2 space-x-1 space-y-1">
-              {possibleWords.toSorted().map((word) => (
-                <div
-                  key={word}
-                  className={cn("whitespace-nowrap px-1 leading-7 text-white", {
-                    "font-bold": isPangram(word),
-                    "rounded-sm bg-yellow-500/30": foundWords.includes(word),
-                  })}
-                >
-                  {capitalize(word)}{" "}
-                  <span className="text-white/50">({getWordScore(word)})</span>
-                </div>
-              ))}
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <div className="max-w-full overflow-hidden text-clip whitespace-nowrap px-1 text-white">
+                {foundWords.toReversed().slice(0, 5).map(capitalize).join(", ")}
+              </div>
+              <span className="ml-0 mr-auto whitespace-nowrap text-white/50">
+                {foundWords.length > 5 ? "..." : ""} ({foundWords.length})
+              </span>
             </div>
-          </div>
-        </>
-      )}
+            <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 pb-3 pt-1">
+              <div className="columns-2 space-x-1 space-y-1">
+                {possibleWords.toSorted().map((word) => (
+                  <div
+                    key={word}
+                    className={cn(
+                      "whitespace-nowrap px-1 leading-7 text-white",
+                      {
+                        "font-bold": isPangram(word),
+                        "rounded-sm bg-yellow-500/30":
+                          foundWords.includes(word),
+                      },
+                    )}
+                  >
+                    {capitalize(word)}{" "}
+                    <span className="text-white/50">
+                      ({getWordScore(word)})
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

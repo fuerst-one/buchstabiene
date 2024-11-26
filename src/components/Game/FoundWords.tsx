@@ -1,15 +1,18 @@
 "use client";
 import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { userAddDownvote, userDeleteDownvote } from "@/server/api/downvotes";
+import { ChevronDown, ThumbsDown } from "lucide-react";
 import { useState } from "react";
 
 export const FoundWords = ({
   foundWords,
   possibleWords,
+  downvotes,
 }: {
   foundWords: string[] | null;
   possibleWords: string[];
+  downvotes: string[];
 }) => {
   const [showAllFoundWords, setShowAllFoundWords] = useState(false);
   const wordsLeft = possibleWords.length - (foundWords?.length ?? 0);
@@ -54,26 +57,46 @@ export const FoundWords = ({
               <div
                 key={word}
                 className={cn(
-                  "w-1/2 whitespace-nowrap px-1 leading-7 text-white",
+                  "flex w-1/2 items-center gap-1 whitespace-nowrap px-1 leading-7 text-white",
                   {
                     "font-bold": isPangram(word),
                   },
                 )}
               >
-                {capitalize(word)}{" "}
+                <span>{capitalize(word)}</span>
                 <span className="text-white/50">({getWordScore(word)})</span>
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className={cn(
+                    downvotes.includes(word)
+                      ? "text-red-500"
+                      : "text-red-500/50",
+                  )}
+                >
+                  <ThumbsDown
+                    className="size-4"
+                    onClick={() =>
+                      downvotes.includes(word)
+                        ? userDeleteDownvote(word)
+                        : userAddDownvote(word)
+                    }
+                  />
+                </span>
               </div>
             ))}
           </div>
-          {wordsLeft ? (
-            <p className="mt-1 text-center text-xs">
-              Noch {wordsLeft} Wörter möglich
-            </p>
-          ) : (
-            <p className="mt-1 text-center text-xs text-yellow-500">
-              Alle Wörter für heute gefunden, Gratulation!
-            </p>
-          )}
+          <p className="mt-1 text-center text-xs">
+            {wordsLeft ? (
+              <>Noch {wordsLeft} Wörter möglich</>
+            ) : (
+              <>Alle Wörter für heute gefunden, Gratulation!</>
+            )}{" "}
+            / Benutze
+            <ThumbsDown className="mx-1 inline size-3 text-white/80" />
+            um Wörter zu downvoten.
+          </p>
         </div>
       )}
     </div>
