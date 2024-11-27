@@ -6,10 +6,12 @@ import { ChevronDown, ThumbsDown } from "lucide-react";
 import { useState } from "react";
 
 export const FoundWords = ({
+  isLoggedIn,
   foundWords,
   possibleWords,
   downvotes,
 }: {
+  isLoggedIn: boolean;
   foundWords: string[] | null;
   possibleWords: string[];
   downvotes: string[];
@@ -65,25 +67,27 @@ export const FoundWords = ({
               >
                 <span>{capitalize(word)}</span>
                 <span className="text-white/50">({getWordScore(word)})</span>
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  className={cn(
-                    downvotes.includes(word)
-                      ? "text-red-500"
-                      : "text-red-500/50",
-                  )}
-                >
-                  <ThumbsDown
-                    className="size-4"
-                    onClick={() =>
+                {isLoggedIn && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className={cn(
                       downvotes.includes(word)
-                        ? userDeleteWordVote(word)
-                        : userAddWordVote(word)
-                    }
-                  />
-                </span>
+                        ? "text-red-500"
+                        : "text-red-500/50",
+                    )}
+                  >
+                    <ThumbsDown
+                      className="size-4"
+                      onClick={() =>
+                        downvotes.includes(word)
+                          ? userDeleteWordVote(word)
+                          : userAddWordVote(word)
+                      }
+                    />
+                  </span>
+                )}
               </div>
             ))}
           </div>

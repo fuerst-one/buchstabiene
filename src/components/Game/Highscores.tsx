@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Highscore } from "@/server/api/game";
+import { Highscore } from "@/server/api/highscores";
 import { User } from "@/server/db/schema";
 import { Lock, Trophy } from "lucide-react";
 import { stagesByPercentage } from "./Stage";

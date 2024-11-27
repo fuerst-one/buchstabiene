@@ -1,4 +1,4 @@
-import { useServerAuth } from "@/zustand/useServerAuth";
+import { getServerSessionUser } from "@/zustand/useServerAuth";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Button } from "../ui/button";
@@ -6,7 +6,7 @@ import { LogoutButton } from "./LogoutButton";
 import { Info } from "lucide-react";
 
 export const _Layout = async ({ children }: { children: ReactNode }) => {
-  const user = (await useServerAuth.getState().getSession())?.user ?? null;
+  const user = await getServerSessionUser();
   return (
     <div className="flex min-h-screen flex-col justify-stretch">
       <div className="flex h-12 items-center justify-between border-b border-white/10 px-4 py-2">

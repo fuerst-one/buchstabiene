@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { auth } from "@/auth";
 import { User } from "@/server/db/schema";
 import { getSessionData } from "@/server/api/session";
-import { NoSessionError } from "@/lib/errors";
+import { NoSessionError, UnauthorizedError } from "@/lib/errors";
 
 export type AuthSession = {
   user: User;
@@ -54,4 +54,19 @@ export const useServerAuth = create<ServerAuthStore>()((set, get) => ({
   },
 }));
 
-export const getServerAuthState = () => useServerAuth.getState();
+export const serverAdminGuard = async () => {
+  const session = await useServerAuth.getState().getSession();
+  if (!session?.user.isAdmin) {
+    throw new UnauthorizedError();
+  }
+  return session;
+};
+
+export const serverSessionGuard = async () => {
+  return await useServerAuth.getState().getSessionOrFail();
+};
+
+export const getServerSessionUser = async () => {
+  const session = await useServerAuth.getState().getSession();
+  return session?.user ?? null;
+};

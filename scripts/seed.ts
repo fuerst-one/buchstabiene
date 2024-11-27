@@ -1,13 +1,12 @@
 import { isPossibleWord, getWinningScore } from "@/components/Game/utils";
 import { DateFormat } from "@/lib/DateFormat";
-import { readWordFile } from "@/lib/readWordFile";
+import { readWordFile, writeWordFile } from "../src/app/_data/files";
 import { shuffle } from "@/lib/shuffle";
 import { db } from "@/server/db/db";
-import { gameDates, games } from "@/server/db/schema";
+import { dictionaryAmendments, gameDates, games } from "@/server/db/schema";
 import dayjs from "dayjs";
-import { join } from "path";
-
-const gameDataDir = join(process.cwd(), "src/app/_data");
+import { inArray } from "drizzle-orm";
+import { generateLetterSets } from "@/app/_data/generateLetterSets";
 
 const seedGames = async (
   words: string[],
@@ -125,11 +124,58 @@ const seedGameDates = async (
   }
 };
 
-const main = async () => {
+const updateFiles = async (words: string[]) => {
+  console.log("Updating Word File");
+
+  const dictionaryAmendments_ = await db.query.dictionaryAmendments.findMany({
+    where: (dictionaryAmendments, { eq, and }) =>
+      and(
+        eq(dictionaryAmendments.action, "delete"),
+        eq(dictionaryAmendments.isSourceFileUpdated, false),
+      ),
+  });
+  const deletedWords = dictionaryAmendments_
+    .map((amendment) => amendment.words)
+    .flat();
+
+  const newWords = words.filter((word) => !deletedWords.includes(word));
+
+  await writeWordFile("words.txt", newWords);
+
+  console.log(
+    "Word File Updated!",
+    words.length - newWords.length,
+    "Deletions",
+  );
+
+  await db
+    .update(dictionaryAmendments)
+    .set({
+      isSourceFileUpdated: true,
+    })
+    .where(
+      inArray(
+        dictionaryAmendments.id,
+        dictionaryAmendments_.map((amendment) => amendment.id),
+      ),
+    );
+
+  const newLetterSets = generateLetterSets(words);
+  await writeWordFile("letterSets.txt", newLetterSets);
+};
+
+const main = async (filesUpdated?: boolean) => {
   const DRY_RUN = false;
 
-  const words = await readWordFile(join(gameDataDir, "words.txt"));
-  const letterSets = await readWordFile(join(gameDataDir, "letterSets.txt"));
+  const words = await readWordFile("words.txt");
+  const letterSets = await readWordFile("letterSets.txt");
+
+  const UPDATE_FILES = true;
+  if (!filesUpdated && UPDATE_FILES) {
+    await updateFiles(words);
+    // Run again with files updated
+    return main(true);
+  }
 
   const SEED_GAMES = false;
   const DROP_GAMES = false;
@@ -137,7 +183,7 @@ const main = async () => {
     await seedGames(words, letterSets, DROP_GAMES, DRY_RUN);
   }
 
-  const SEED_GAME_DATES = true;
+  const SEED_GAME_DATES = false;
   const DROP_GAME_DATES = false;
   if (SEED_GAME_DATES) {
     await seedGameDates(letterSets, DROP_GAME_DATES, DRY_RUN);

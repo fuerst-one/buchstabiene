@@ -1,5 +1,6 @@
 "use client";
-import { getSavedGame, revealSolutionsForUser } from "@/server/api/game";
+import { userGetSavedGame } from "@/server/api/game";
+import { userRevealSolutions } from "@/server/api/solutions";
 import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
 import { User } from "@/server/db/schema";
@@ -29,7 +30,7 @@ export const Solutions = ({
     const getSavedState = async () => {
       let savedState: SaveState | null = null;
       if (user) {
-        savedState = await getSavedGame(gameId);
+        savedState = await userGetSavedGame(gameId);
       } else {
         const savedStateContent = localStorage.getItem(
           SAVE_STATE_LOCAL_STORAGE_KEY,
@@ -50,7 +51,7 @@ export const Solutions = ({
 
   const revealSolutions = async () => {
     if (user) {
-      await revealSolutionsForUser(gameId);
+      await userRevealSolutions(gameId);
     } else {
       localStorage.setItem(
         SAVE_STATE_LOCAL_STORAGE_KEY,
@@ -109,25 +110,27 @@ export const Solutions = ({
                     <span className="text-white/50">
                       ({getWordScore(word)})
                     </span>
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      className={cn(
-                        downvotes.includes(word)
-                          ? "text-red-500"
-                          : "text-red-500/50",
-                      )}
-                    >
-                      <ThumbsDown
-                        className="size-4"
-                        onClick={() =>
+                    {user && (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className={cn(
                           downvotes.includes(word)
-                            ? userDeleteWordVote(word)
-                            : userAddWordVote(word)
-                        }
-                      />
-                    </span>
+                            ? "text-red-500"
+                            : "text-red-500/50",
+                        )}
+                      >
+                        <ThumbsDown
+                          className="size-4"
+                          onClick={() =>
+                            downvotes.includes(word)
+                              ? userDeleteWordVote(word)
+                              : userAddWordVote(word)
+                          }
+                        />
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

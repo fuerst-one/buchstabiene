@@ -3,8 +3,9 @@ import { Highscores } from "@/components/Game/Highscores";
 import { getTotalScore, getWinningScore } from "@/components/Game/utils";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
-import { getGameByDate, getHighscoresByDate } from "@/server/api/game";
-import { useServerAuth } from "@/zustand/useServerAuth";
+import { publicGetGameByDate } from "@/server/api/game";
+import { publicGetHighscoresByDate } from "@/server/api/highscores";
+import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -23,7 +24,7 @@ export default async function GameByDateSolution({
     redirect(`/spielen/${gameDateString()}`);
   }
 
-  const gameData = await getGameByDate(dateString);
+  const gameData = await publicGetGameByDate(dateString);
 
   if (gameDateDate(dateString).startOf("day").isAfter(dayjsTz()) || !gameData) {
     return (
@@ -36,8 +37,8 @@ export default async function GameByDateSolution({
     );
   }
 
-  const user = (await useServerAuth.getState().getSession())?.user ?? null;
-  const highscores = await getHighscoresByDate(dateString);
+  const user = await getServerSessionUser();
+  const highscores = await publicGetHighscoresByDate(dateString);
 
   return (
     <>

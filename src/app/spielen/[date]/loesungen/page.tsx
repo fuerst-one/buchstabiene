@@ -3,8 +3,8 @@ import { Solutions } from "@/components/Game/Solutions";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { userGetWordVotes } from "@/server/api/wordVotes";
-import { getGameByDate } from "@/server/api/game";
-import { useServerAuth } from "@/zustand/useServerAuth";
+import { publicGetGameByDate } from "@/server/api/game";
+import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -23,7 +23,7 @@ export default async function GameByDateSolution({
     redirect(`/spielen/${gameDateString()}`);
   }
 
-  const gameData = await getGameByDate(dateString);
+  const gameData = await publicGetGameByDate(dateString);
 
   if (gameDateDate(dateString).startOf("day").isAfter(dayjsTz()) || !gameData) {
     return (
@@ -36,7 +36,7 @@ export default async function GameByDateSolution({
     );
   }
 
-  const user = (await useServerAuth.getState().getSession())?.user ?? null;
+  const user = await getServerSessionUser();
   const downvotes = (await userGetWordVotes()).map((downvote) => downvote.word);
   const { gameId, possibleWords } = gameData;
 

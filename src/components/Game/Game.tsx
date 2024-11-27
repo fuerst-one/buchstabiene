@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { GameData, updateSavedGame } from "@/server/api/game";
-import { getSavedGame } from "@/server/api/game";
+import { GameData, userUpdateSavedGame } from "@/server/api/game";
+import { userGetSavedGame } from "@/server/api/game";
 import { User } from "@/server/db/schema";
 import {
   getTotalScore,
@@ -49,7 +49,7 @@ export const Game = ({
     const getSavedState = async () => {
       let savedState: SaveState | null = null;
       if (user) {
-        savedState = await getSavedGame(gameId);
+        savedState = await userGetSavedGame(gameId);
       } else {
         const savedStateContent = localStorage.getItem(
           SAVE_STATE_LOCAL_STORAGE_KEY,
@@ -72,7 +72,7 @@ export const Game = ({
   const onChangeFoundWords = async (foundWords: string[]) => {
     setFoundWords(foundWords);
     if (user) {
-      await updateSavedGame(gameId, foundWords);
+      await userUpdateSavedGame(gameId, foundWords);
     } else {
       localStorage.setItem(
         SAVE_STATE_LOCAL_STORAGE_KEY,
@@ -162,6 +162,7 @@ export const Game = ({
         completed={foundWords?.length === possibleWords.length}
       />
       <FoundWords
+        isLoggedIn={!!user}
         foundWords={foundWords}
         possibleWords={possibleWords}
         downvotes={downvotes}

@@ -3,12 +3,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { gameDateString } from "@/lib/DateFormat";
 import { Calendar } from "@/components/ui/calendar";
-import { getPlayedGames } from "@/server/api/game";
+import { userGetPlayedGames } from "@/server/api/game";
 import { redirect } from "next/navigation";
 import { GLOBAL_CONFIG } from "@/config";
 
 export default async function Home() {
-  const playedGames = await getPlayedGames();
+  const playedGames = await userGetPlayedGames();
 
   return (
     <div className="container flex h-full items-center justify-center">
