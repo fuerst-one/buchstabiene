@@ -44,14 +44,19 @@ export const isPangram = (word: string) => {
   return getLettersFromWord(word).length >= 7;
 };
 
+const getWordLengthScore = (word: string) => {
+  return word.length === 4 ? 1 : word.length;
+};
+
+const getWordPangramScore = (word: string) => {
+  return isPangram(word) ? 7 : 0;
+};
+
 export const getWordScore = (word: string) => {
-  if (word.length === 4) {
-    return 1;
-  }
-  if (isPangram(word)) {
-    return word.length + 7;
-  }
-  return word.length;
+  let score = 0;
+  score += getWordLengthScore(word);
+  score += getWordPangramScore(word);
+  return score;
 };
 
 export const getTotalScore = (words?: string[] | null) => {

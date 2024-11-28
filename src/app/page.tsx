@@ -21,9 +21,7 @@ export default async function Home() {
         <div className="mt-4 flex flex-col items-center justify-center gap-2">
           <h2 className="text-lg font-bold">Letzte Spiele</h2>
           <Calendar
-            selected={playedGames.map((date) =>
-              dayjsTz(date.timestamp).toDate(),
-            )}
+            selected={playedGames.map((date) => dayjsTz(date).toDate())}
             disabled={{
               before: dayjsTz(GLOBAL_CONFIG.firstGameDate).toDate(),
               after: dayjsTz().toDate(),

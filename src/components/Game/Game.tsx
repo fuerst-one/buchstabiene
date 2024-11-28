@@ -20,7 +20,7 @@ import { DialogCompleted } from "./DialogCompleted";
 export const SAVE_STATE_LOCAL_STORAGE_KEY = "spelling-bee-save-state";
 
 export type SaveState = {
-  gameId: string;
+  date: string;
   foundWords: string[];
   solutionsRevealed: boolean;
 };
@@ -34,7 +34,7 @@ export const Game = ({
   gameData: GameData;
   downvotes: string[];
 }) => {
-  const { gameId, letterSet, possibleWords, winningScore } = gameData;
+  const { date, letterSet, possibleWords, winningScore } = gameData;
 
   const [foundWords, setFoundWords] = useState<string[] | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
@@ -49,7 +49,7 @@ export const Game = ({
     const getSavedState = async () => {
       let savedState: SaveState | null = null;
       if (user) {
-        savedState = await userGetSavedGame(gameId);
+        savedState = await userGetSavedGame(date);
       } else {
         const savedStateContent = localStorage.getItem(
           SAVE_STATE_LOCAL_STORAGE_KEY,
@@ -59,7 +59,7 @@ export const Game = ({
         }
         savedState = JSON.parse(savedStateContent) as SaveState;
       }
-      if (!savedState || savedState.gameId !== gameId) {
+      if (!savedState || savedState.date !== date) {
         setFoundWords([]);
         return;
       }
@@ -67,17 +67,17 @@ export const Game = ({
       setFoundWords(savedState.foundWords);
     };
     getSavedState();
-  }, [gameId, user]);
+  }, [date, user]);
 
   const onChangeFoundWords = async (foundWords: string[]) => {
     setFoundWords(foundWords);
     if (user) {
-      await userUpdateSavedGame(gameId, foundWords);
+      await userUpdateSavedGame(date, foundWords);
     } else {
       localStorage.setItem(
         SAVE_STATE_LOCAL_STORAGE_KEY,
         JSON.stringify({
-          gameId,
+          date,
           foundWords,
           solutionsRevealed: false,
         }),

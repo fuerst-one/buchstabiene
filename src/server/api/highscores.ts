@@ -9,7 +9,7 @@ export const publicGetHighscoresByDate = async (date: string) => {
     return [];
   }
   const savedGames = await db.query.savedGames.findMany({
-    where: (savedGames, { eq }) => eq(savedGames.gameId, game.gameId),
+    where: (savedGames, { eq }) => eq(savedGames.date, game.date),
     with: {
       user: true,
     },

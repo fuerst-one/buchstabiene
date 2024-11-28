@@ -41,4 +41,4 @@ next-env.d.ts
 
 .vscode
 
-/src/app/_data/raw
+/scripts/_data/test

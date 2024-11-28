@@ -55,26 +55,33 @@ export const accounts = pgTable(
   }),
 );
 
-export const savedGames = pgTable(
-  "saved_games",
-  {
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    gameId: text("game_id").notNull(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-    foundWords: json("found_words")
-      .$type<string[]>()
-      .notNull()
-      .$defaultFn(() => []),
-    solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
-  },
-  (savedGames) => {
-    return {
-      pk: primaryKey({ columns: [savedGames.userId, savedGames.gameId] }),
-    };
-  },
-);
+export const games = pgTable("games", {
+  date: varchar("date", { length: 10 }).notNull().primaryKey(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  letterSet: varchar("letter_set", { length: 7 }).unique().notNull(),
+  possibleWords: json("possible_words")
+    .$type<string[]>()
+    .notNull()
+    .$defaultFn(() => []),
+});
+export type Game = typeof games.$inferSelect;
+export type GameInsert = typeof games.$inferInsert;
+export const gameSchema = createSelectSchema(games);
+
+export const savedGames = pgTable("saved_games", {
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  date: varchar("date", { length: 10 })
+    .notNull()
+    .references(() => games.date),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  foundWords: json("found_words")
+    .$type<string[]>()
+    .notNull()
+    .$defaultFn(() => []),
+  solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
+});
 export type SavedGame = typeof savedGames.$inferSelect;
 export type SavedGameInsert = typeof savedGames.$inferInsert;
 export const savedGameSchema = createSelectSchema(savedGames);
@@ -84,36 +91,9 @@ export const savedGameRelations = relations(savedGames, ({ one }) => ({
     fields: [savedGames.userId],
     references: [users.id],
   }),
-}));
-
-export const games = pgTable("games", {
-  index: serial("index").notNull().primaryKey(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  letterSet: varchar("letter_set", { length: 7 }).unique().notNull(),
-  possibleWords: text("possible_words").notNull(),
-});
-export type Game = typeof games.$inferSelect;
-export type GameInsert = typeof games.$inferInsert;
-export const gameSchema = createSelectSchema(games);
-
-export const gameRelations = relations(games, ({ many }) => ({
-  gameDates: many(gameDates),
-}));
-
-export const gameDates = pgTable("game_dates", {
-  date: varchar("date", { length: 10 }).notNull().primaryKey(),
-  gameIndex: integer("game_index")
-    .notNull()
-    .references(() => games.index),
-});
-export type GameDate = typeof gameDates.$inferSelect;
-export type GameDateInsert = typeof gameDates.$inferInsert;
-export const gameDateSchema = createSelectSchema(gameDates);
-
-export const gameDateRelations = relations(gameDates, ({ one }) => ({
   game: one(games, {
-    fields: [gameDates.gameIndex],
-    references: [games.index],
+    fields: [savedGames.date],
+    references: [games.date],
   }),
 }));
 
@@ -160,9 +140,9 @@ export const dictionaryAmendmentAffectedGames = pgTable(
     amendmentId: integer("amendment_id")
       .notNull()
       .references(() => dictionaryAmendments.id),
-    gameIndex: integer("game_index")
+    gameDate: varchar("game_date", { length: 10 })
       .notNull()
-      .references(() => games.index),
+      .references(() => games.date),
   },
 );
 
@@ -170,8 +150,8 @@ export const dictionaryAmendmentAffectedGamesRelations = relations(
   dictionaryAmendmentAffectedGames,
   ({ one }) => ({
     game: one(games, {
-      fields: [dictionaryAmendmentAffectedGames.gameIndex],
-      references: [games.index],
+      fields: [dictionaryAmendmentAffectedGames.gameDate],
+      references: [games.date],
     }),
     dictionaryAmendment: one(dictionaryAmendments, {
       fields: [dictionaryAmendmentAffectedGames.amendmentId],
@@ -182,14 +162,11 @@ export const dictionaryAmendmentAffectedGamesRelations = relations(
 
 export const schema = {
   users,
-  accounts,
   userRelations,
+  accounts,
+  games,
   savedGames,
   savedGameRelations,
-  games,
-  gameRelations,
-  gameDates,
-  gameDateRelations,
   wordVotes,
   wordVoteRelations,
   dictionaryAmendments,
@@ -200,9 +177,8 @@ export const schema = {
 export const tables = [
   "users",
   "accounts",
-  "savedGames",
   "games",
-  "gameDates",
+  "savedGames",
   "wordVotes",
   "dictionaryAmendments",
   "dictionaryAmendmentAffectedGames",

@@ -44,7 +44,7 @@ export const adminDeleteWordFromGames = async (
     // Check if the game contains any of the words to delete.
     const affectedBatch = [];
     for (const game of games_) {
-      const oldPossibleWords = game.possibleWords.split(",");
+      const oldPossibleWords = game.possibleWords;
       const newPossibleWords = oldPossibleWords.filter(
         (w) => !words.includes(w),
       );
@@ -52,22 +52,21 @@ export const adminDeleteWordFromGames = async (
         continue;
       }
       affectedBatch.push({
-        index: game.index,
-        dates: game.gameDates.map((d) => d.date),
+        date: game.date,
         oldPossibleWords,
         newPossibleWords,
       });
     }
     // Update the games with the new possible words.
     await Promise.all(
-      affectedBatch.map(({ index, newPossibleWords }) =>
+      affectedBatch.map(({ date, newPossibleWords }) =>
         db
           .update(games)
           .set({
-            possibleWords: newPossibleWords.join(","),
+            possibleWords: newPossibleWords,
             updatedAt: new Date(),
           })
-          .where(eq(games.index, index)),
+          .where(eq(games.date, date)),
       ),
     );
     offset += games_.length;
@@ -100,7 +99,7 @@ export const adminDeleteWordFromGames = async (
         continue;
       }
       affectedBatch.push({
-        gameId: savedGame.gameId,
+        date: savedGame.date,
         userId: savedGame.userId,
         oldFoundWords,
         newFoundWords,
@@ -109,13 +108,11 @@ export const adminDeleteWordFromGames = async (
 
     // Update the saved games with the new found words.
     await Promise.all(
-      affectedBatch.map(({ newFoundWords, gameId, userId }) =>
+      affectedBatch.map(({ newFoundWords, date, userId }) =>
         db
           .update(savedGames)
           .set({ foundWords: newFoundWords, updatedAt: new Date() })
-          .where(
-            and(eq(savedGames.gameId, gameId), eq(savedGames.userId, userId)),
-          ),
+          .where(and(eq(savedGames.date, date), eq(savedGames.userId, userId))),
       ),
     );
     offset += savedGames_.length;
@@ -137,8 +134,8 @@ export const adminDeleteWordFromGames = async (
   const dictionaryAmendmentAffectedGames_ = await db
     .insert(dictionaryAmendmentAffectedGames)
     .values(
-      affectedGames.map(({ index }) => ({
-        gameIndex: index,
+      affectedGames.map(({ date }) => ({
+        gameDate: date,
         amendmentId: dictionaryAmendment.id,
       })),
     )

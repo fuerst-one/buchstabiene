@@ -14,12 +14,12 @@ import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
 
 export const Solutions = ({
   user,
-  gameId,
+  date,
   possibleWords,
   downvotes,
 }: {
   user: User | null;
-  gameId: string;
+  date: string;
   possibleWords: string[];
   downvotes: string[];
 }) => {
@@ -30,7 +30,7 @@ export const Solutions = ({
     const getSavedState = async () => {
       let savedState: SaveState | null = null;
       if (user) {
-        savedState = await userGetSavedGame(gameId);
+        savedState = await userGetSavedGame(date);
       } else {
         const savedStateContent = localStorage.getItem(
           SAVE_STATE_LOCAL_STORAGE_KEY,
@@ -40,23 +40,23 @@ export const Solutions = ({
         }
         savedState = JSON.parse(savedStateContent) as SaveState;
       }
-      if (savedState?.gameId !== gameId) {
+      if (savedState?.date !== date) {
         return;
       }
       setShowSolutions(savedState.solutionsRevealed);
       setFoundWords(savedState.foundWords);
     };
     getSavedState();
-  }, [gameId, user]);
+  }, [date, user]);
 
   const revealSolutions = async () => {
     if (user) {
-      await userRevealSolutions(gameId);
+      await userRevealSolutions(date);
     } else {
       localStorage.setItem(
         SAVE_STATE_LOCAL_STORAGE_KEY,
         JSON.stringify({
-          gameId,
+          date,
           foundWords,
           solutionsRevealed: true,
         }),

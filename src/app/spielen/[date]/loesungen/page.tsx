@@ -38,7 +38,7 @@ export default async function GameByDateSolution({
 
   const user = await getServerSessionUser();
   const downvotes = (await userGetWordVotes()).map((downvote) => downvote.word);
-  const { gameId, possibleWords } = gameData;
+  const { date, possibleWords } = gameData;
 
   return (
     <>
@@ -46,7 +46,7 @@ export default async function GameByDateSolution({
       <Suspense fallback={<div>Lädt...</div>}>
         <Solutions
           user={user}
-          gameId={gameId}
+          date={date}
           possibleWords={possibleWords}
           downvotes={downvotes}
         />
