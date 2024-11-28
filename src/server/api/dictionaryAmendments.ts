@@ -1,15 +1,8 @@
 "use server";
 import { serverAdminGuard } from "@/zustand/useServerAuth";
 import { db } from "@/server/db/db";
-import { and, eq, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import {
-  games,
-  savedGames,
-  dictionaryAmendments,
-  dictionaryAmendmentAffectedGames,
-  wordVotes,
-} from "../db/schema";
+import { inArray } from "drizzle-orm";
+import { dictionaryAmendments, wordVotes } from "../db/schema";
 
 export type DeletionReason = "manual_action" | "downvote_threshold";
 
@@ -25,133 +18,19 @@ export const adminDeleteWordFromGames = async (
 ) => {
   await serverAdminGuard();
 
-  // Since games and saved games could be large, we need to do this in chunks.
-  const CHUNK_SIZE = 100;
-
-  // Find all games that contain the words to delete.
-  let offset = 0;
-  const affectedGames = [];
-  while (true) {
-    const games_ = await db.query.games.findMany({
-      offset,
-      limit: CHUNK_SIZE,
-      with: { gameDates: true },
-    });
-    if (games_.length === 0) {
-      break;
-    }
-
-    // Check if the game contains any of the words to delete.
-    const affectedBatch = [];
-    for (const game of games_) {
-      const oldPossibleWords = game.possibleWords;
-      const newPossibleWords = oldPossibleWords.filter(
-        (w) => !words.includes(w),
-      );
-      if (newPossibleWords.length === oldPossibleWords.length) {
-        continue;
-      }
-      affectedBatch.push({
-        date: game.date,
-        oldPossibleWords,
-        newPossibleWords,
-      });
-    }
-    // Update the games with the new possible words.
-    await Promise.all(
-      affectedBatch.map(({ date, newPossibleWords }) =>
-        db
-          .update(games)
-          .set({
-            possibleWords: newPossibleWords,
-            updatedAt: new Date(),
-          })
-          .where(eq(games.date, date)),
-      ),
-    );
-    offset += games_.length;
-    affectedGames.push(...affectedBatch);
-  }
-
-  // If no games were affected, return.
-  if (affectedGames.length === 0) {
-    return 0;
-  }
-
-  // Find all saved games that contain the words to delete.
-  offset = 0;
-  const affectedSavedGames = [];
-  while (true) {
-    const savedGames_ = await db.query.savedGames.findMany({
-      offset,
-      limit: CHUNK_SIZE,
-    });
-    if (savedGames_.length === 0) {
-      break;
-    }
-
-    // Check if the saved game contains any of the words to delete.
-    const affectedBatch = [];
-    for (const savedGame of savedGames_) {
-      const oldFoundWords = savedGame.foundWords;
-      const newFoundWords = oldFoundWords.filter((w) => !words.includes(w));
-      if (newFoundWords.length === oldFoundWords.length) {
-        continue;
-      }
-      affectedBatch.push({
-        date: savedGame.date,
-        userId: savedGame.userId,
-        oldFoundWords,
-        newFoundWords,
-      });
-    }
-
-    // Update the saved games with the new found words.
-    await Promise.all(
-      affectedBatch.map(({ newFoundWords, date, userId }) =>
-        db
-          .update(savedGames)
-          .set({ foundWords: newFoundWords, updatedAt: new Date() })
-          .where(and(eq(savedGames.date, date), eq(savedGames.userId, userId))),
-      ),
-    );
-    offset += savedGames_.length;
-    affectedSavedGames.push(...affectedBatch);
-  }
-
   // Create the dictionary amendment with the deleted words.
   const dictionaryAmendments_ = await db
     .insert(dictionaryAmendments)
     .values({
       words,
-      action: "delete",
+      action: "remove",
       reason,
     })
     .returning();
   const dictionaryAmendment = dictionaryAmendments_[0];
 
-  // Create the dictionary amendment affected games to link the amendment to the games.
-  const dictionaryAmendmentAffectedGames_ = await db
-    .insert(dictionaryAmendmentAffectedGames)
-    .values(
-      affectedGames.map(({ date }) => ({
-        gameDate: date,
-        amendmentId: dictionaryAmendment.id,
-      })),
-    )
-    .returning();
-
   // Delete the word votes for the deleted words.
   await db.delete(wordVotes).where(inArray(wordVotes.word, words));
 
-  // Revalidate the admin and game pages.
-  revalidatePath("/admin", "page");
-  revalidatePath("/spielen/[date]", "page");
-
-  return {
-    affectedGames,
-    affectedSavedGames,
-    dictionaryAmendment,
-    dictionaryAmendmentAffectedGames: dictionaryAmendmentAffectedGames_,
-  };
+  return dictionaryAmendment;
 };

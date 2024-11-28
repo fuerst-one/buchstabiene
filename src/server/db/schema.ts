@@ -131,9 +131,7 @@ export const dictionaryAmendments = pgTable("dictionary_amendments", {
     .$type<string[]>()
     .notNull()
     .$defaultFn(() => []),
-  isSourceFileUpdated: boolean("is_source_file_updated")
-    .notNull()
-    .default(false),
+  isApplied: boolean("is_applied").notNull().default(false),
 });
 export type DictionaryAmendment = typeof dictionaryAmendments.$inferSelect;
 export type DictionaryAmendmentInsert =
