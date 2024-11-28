@@ -1,7 +1,10 @@
 "use server";
 import { savedGames } from "../db/schema";
 import { db } from "../db/db";
-import { serverSessionGuard } from "@/zustand/useServerAuth";
+import {
+  getServerSessionUser,
+  serverSessionGuard,
+} from "@/zustand/useServerAuth";
 import { getWinningScore } from "@/components/Game/utils";
 import { revalidatePath } from "next/cache";
 
@@ -34,7 +37,10 @@ export const userGetSavedGame = async (date: string) => {
 export type SavedGame = NonNullable<ReturnType<typeof userGetSavedGame>>;
 
 export const userGetPlayedGames = async () => {
-  const userId = (await serverSessionGuard()).user.id;
+  const userId = (await getServerSessionUser())?.id;
+  if (!userId) {
+    return [];
+  }
   const savedGames = await db.query.savedGames.findMany({
     where: (savedGames, { eq }) => eq(savedGames.userId, userId),
   });
@@ -46,16 +52,18 @@ export const userUpdateSavedGame = async (
   foundWords: string[],
 ) => {
   const userId = (await serverSessionGuard()).user.id;
+  const updatedAt = new Date();
   const inserted = await db
     .insert(savedGames)
     .values({
+      updatedAt,
       userId,
       date,
       foundWords,
     })
     .onConflictDoUpdate({
       target: [savedGames.date, savedGames.userId],
-      set: { foundWords, updatedAt: new Date() },
+      set: { updatedAt, foundWords },
     })
     .returning();
   revalidatePath(`/spielen/[date]`, "page");

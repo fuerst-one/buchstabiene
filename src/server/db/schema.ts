@@ -5,6 +5,7 @@ import {
   timestamp,
   varchar,
   serial,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { primaryKey } from "drizzle-orm/pg-core";
@@ -68,20 +69,26 @@ export type Game = typeof games.$inferSelect;
 export type GameInsert = typeof games.$inferInsert;
 export const gameSchema = createSelectSchema(games);
 
-export const savedGames = pgTable("saved_games", {
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  date: varchar("date", { length: 10 })
-    .notNull()
-    .references(() => games.date),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  foundWords: json("found_words")
-    .$type<string[]>()
-    .notNull()
-    .$defaultFn(() => []),
-  solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
-});
+export const savedGames = pgTable(
+  "saved_games",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    date: varchar("date", { length: 10 })
+      .notNull()
+      .references(() => games.date),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    foundWords: json("found_words")
+      .$type<string[]>()
+      .notNull()
+      .$defaultFn(() => []),
+    solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
+  },
+  (t) => ({
+    unq: unique().on(t.userId, t.date),
+  }),
+);
 export type SavedGame = typeof savedGames.$inferSelect;
 export type SavedGameInsert = typeof savedGames.$inferInsert;
 export const savedGameSchema = createSelectSchema(savedGames);

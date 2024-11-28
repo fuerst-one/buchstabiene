@@ -1,12 +1,19 @@
 "use server";
 import { db } from "@/server/db/db";
-import { serverAdminGuard, serverSessionGuard } from "@/zustand/useServerAuth";
+import {
+  getServerSessionUser,
+  serverAdminGuard,
+  serverSessionGuard,
+} from "@/zustand/useServerAuth";
 import { wordVotes } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export const userGetWordVotes = async () => {
-  const userId = (await serverSessionGuard()).user.id;
+  const userId = (await getServerSessionUser())?.id;
+  if (!userId) {
+    return [];
+  }
   return await db.query.wordVotes.findMany({
     where: eq(wordVotes.userId, userId),
   });
