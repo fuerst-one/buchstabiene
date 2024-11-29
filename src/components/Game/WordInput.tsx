@@ -4,6 +4,7 @@ import { useState, useCallback, ComponentProps } from "react";
 import { Message } from "./utils";
 import { useWindowEventListener } from "@/lib/useWindowEventListener";
 import { Lock } from "lucide-react";
+import { shuffle } from "@/lib/shuffle";
 
 export const WordInput = ({
   letterSet,
@@ -26,10 +27,6 @@ export const WordInput = ({
     setSelectedLetters((prev) => prev + letter);
   }, []);
 
-  const shuffleLetters = useCallback(() => {
-    setOtherLetters((prev) => [...prev].sort(() => Math.random() - 0.5));
-  }, []);
-
   const deleteLetter = useCallback(() => {
     setSelectedLetters((prev) => prev.slice(0, -1));
   }, []);
@@ -47,7 +44,7 @@ export const WordInput = ({
         setSelectedLetters("");
       }
       const key = event.key.toLowerCase();
-      if (letterSet.includes(key)) {
+      if (letterSet.includes(key) && !event.altKey && !event.ctrlKey) {
         addSelectedLetter(event.key);
       } else if (key === "backspace") {
         if (event.ctrlKey || event.altKey) {
@@ -61,6 +58,24 @@ export const WordInput = ({
     },
     [addSelectedLetter, deleteLetter, handleSubmit],
   );
+
+  const onStartDelete = useCallback(() => {
+    deleteLetter();
+    let interval: NodeJS.Timeout;
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        deleteLetter();
+      }, 100);
+    }, 500);
+    window.addEventListener("pointerup", () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    });
+  }, [deleteLetter]);
+
+  const shuffleLetters = useCallback(() => {
+    setOtherLetters((prev) => shuffle(prev));
+  }, []);
 
   const LetterButton = useCallback(
     ({ letter, className }: { letter: string; className?: string }) => {
@@ -125,9 +140,9 @@ export const WordInput = ({
         </div>
       </div>
       <div className="flex items-center justify-center gap-3">
-        <RoundButton onClick={deleteLetter}>Löschen</RoundButton>
-        <RoundButton onClick={shuffleLetters}>Zufall</RoundButton>
-        <RoundButton onClick={handleSubmit}>Eingabe</RoundButton>
+        <RoundButton onPointerDown={onStartDelete}>Löschen</RoundButton>
+        <RoundButton onPointerDown={shuffleLetters}>Zufall</RoundButton>
+        <RoundButton onPointerDown={handleSubmit}>Eingabe</RoundButton>
       </div>
     </div>
   );
@@ -172,8 +187,12 @@ const RoundButton = (props: ComponentProps<"button">) => {
   return (
     <button
       {...props}
+      onFocus={(event) => {
+        event.target.blur();
+        props.onFocus?.(event);
+      }}
       className={cn(
-        "rounded-full border border-white/50 px-4 py-2 text-white",
+        "select-none rounded-full border border-white/50 px-4 py-2 text-white",
         props.className,
       )}
     />
