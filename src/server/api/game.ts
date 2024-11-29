@@ -27,7 +27,10 @@ export type GameDataResponse = Awaited<ReturnType<typeof publicGetGameByDate>>;
 export type GameData = NonNullable<GameDataResponse>;
 
 export const userGetSavedGame = async (date: string) => {
-  const userId = (await serverSessionGuard()).user.id;
+  const userId = (await getServerSessionUser())?.id;
+  if (!userId) {
+    return null;
+  }
   const savedGame = await db.query.savedGames.findFirst({
     where: (savedGames, { and, eq }) =>
       and(eq(savedGames.date, date), eq(savedGames.userId, userId)),

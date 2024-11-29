@@ -1,8 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { GameData, userUpdateSavedGame } from "@/server/api/game";
-import { userGetSavedGame } from "@/server/api/game";
-import { User } from "@/server/db/schema";
+import React, { useState } from "react";
+import { GameData } from "@/server/api/game";
 import {
   getTotalScore,
   getWordScore,
@@ -16,74 +14,33 @@ import { isPangram } from "./utils";
 import { WordInput } from "./WordInput";
 import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
-
-export const SAVE_STATE_LOCAL_STORAGE_KEY = "spelling-bee-save-state";
-
-export type SaveState = {
-  date: string;
-  foundWords: string[];
-  solutionsRevealed: boolean;
-};
+import { useSaveState } from "./useSaveState";
+import { SaveState } from "./useSaveState";
 
 export const Game = ({
-  user,
   gameData,
+  isLoggedIn,
+  savedGame,
   downvotes,
 }: {
-  user: User | null;
   gameData: GameData;
+  isLoggedIn: boolean;
+  savedGame: SaveState | null;
   downvotes: string[];
 }) => {
   const { date, letterSet, possibleWords, winningScore } = gameData;
 
-  const [foundWords, setFoundWords] = useState<string[] | null>(null);
+  const { foundWords, solutionsRevealed, setFoundWords } = useSaveState({
+    date,
+    savedGame,
+  });
+
   const [message, setMessage] = useState<Message | null>(null);
   const [messageTimeout, setMessageTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
   const [showWinningDialog, setShowWinningDialog] = useState(false);
   const [showCompletedDialog, setShowCompletedDialog] = useState(false);
-  const [isRevealed, setIsRevealed] = useState(false);
-
-  useEffect(() => {
-    const getSavedState = async () => {
-      let savedState: SaveState | null = null;
-      if (user) {
-        savedState = await userGetSavedGame(date);
-      } else {
-        const savedStateContent = localStorage.getItem(
-          SAVE_STATE_LOCAL_STORAGE_KEY,
-        );
-        if (!savedStateContent) {
-          return;
-        }
-        savedState = JSON.parse(savedStateContent) as SaveState;
-      }
-      if (!savedState || savedState.date !== date) {
-        setFoundWords([]);
-        return;
-      }
-      setIsRevealed(savedState.solutionsRevealed);
-      setFoundWords(savedState.foundWords);
-    };
-    getSavedState();
-  }, [date, user]);
-
-  const onChangeFoundWords = async (foundWords: string[]) => {
-    setFoundWords(foundWords);
-    if (user) {
-      await userUpdateSavedGame(date, foundWords);
-    } else {
-      localStorage.setItem(
-        SAVE_STATE_LOCAL_STORAGE_KEY,
-        JSON.stringify({
-          date,
-          foundWords,
-          solutionsRevealed: false,
-        }),
-      );
-    }
-  };
 
   const flashMessage = async (messageType: MessageType, score?: number) => {
     return new Promise<void>((resolve) => {
@@ -125,8 +82,8 @@ export const Game = ({
 
     const oldFoundWords = foundWords ?? [];
     const newFoundWords = [...oldFoundWords, word];
-    if (!isRevealed) {
-      onChangeFoundWords(newFoundWords);
+    if (!solutionsRevealed) {
+      setFoundWords(newFoundWords);
     }
 
     const wordScore = getWordScore(word);
@@ -162,7 +119,7 @@ export const Game = ({
         completed={foundWords?.length === possibleWords.length}
       />
       <FoundWords
-        isLoggedIn={!!user}
+        isLoggedIn={isLoggedIn}
         foundWords={foundWords}
         possibleWords={possibleWords}
         downvotes={downvotes}
@@ -170,7 +127,7 @@ export const Game = ({
       <WordInput
         letterSet={letterSet}
         message={message}
-        isRevealed={isRevealed}
+        isRevealed={solutionsRevealed}
         onSubmit={submitWord}
         onCancelMessage={cancelMessage}
       />

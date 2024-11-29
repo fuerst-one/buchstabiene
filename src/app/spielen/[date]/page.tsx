@@ -3,7 +3,7 @@ import { GameNavigation } from "@/components/Game/GameNavigation";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { userGetWordVotes } from "@/server/api/wordVotes";
-import { publicGetGameByDate } from "@/server/api/game";
+import { publicGetGameByDate, userGetSavedGame } from "@/server/api/game";
 import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -37,13 +37,19 @@ export default async function GameByDate({
   }
 
   const user = await getServerSessionUser();
+  const savedGame = await userGetSavedGame(dateString);
   const downvotes = (await userGetWordVotes()).map((downvote) => downvote.word);
 
   return (
     <>
       <GameNavigation dateString={dateString} activeLink="game" />
       <Suspense fallback={<div>Lädt...</div>}>
-        <Game user={user} gameData={gameData} downvotes={downvotes} />
+        <Game
+          gameData={gameData}
+          isLoggedIn={!!user}
+          savedGame={savedGame}
+          downvotes={downvotes}
+        />
       </Suspense>
     </>
   );

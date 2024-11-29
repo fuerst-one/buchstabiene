@@ -67,7 +67,7 @@ export const WordInput = ({
       return (
         <HexagonButton
           className={className}
-          onClick={() => addSelectedLetter(letter)}
+          onPointerDown={() => addSelectedLetter(letter)}
         >
           {letter}
         </HexagonButton>
@@ -143,10 +143,22 @@ const HexagonButton = (props: ComponentProps<"button">) => {
         { "scale-90": isActive },
         props.className,
       )}
-      onPointerDown={() => setIsActive(true)}
-      onPointerUp={() => setIsActive(false)}
-      onPointerLeave={() => setIsActive(false)}
-      onFocus={(event) => event.target.blur()}
+      onPointerDown={(event) => {
+        setIsActive(true);
+        props.onPointerDown?.(event);
+      }}
+      onPointerUp={(event) => {
+        setIsActive(false);
+        props.onPointerUp?.(event);
+      }}
+      onPointerLeave={(event) => {
+        setIsActive(false);
+        props.onPointerLeave?.(event);
+      }}
+      onFocus={(event) => {
+        event.target.blur();
+        props.onFocus?.(event);
+      }}
       style={{
         clipPath:
           "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
@@ -161,7 +173,7 @@ const RoundButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "rounded-full border border-white/50 px-3 py-1 text-white",
+        "rounded-full border border-white/50 px-4 py-2 text-white",
         props.className,
       )}
     />

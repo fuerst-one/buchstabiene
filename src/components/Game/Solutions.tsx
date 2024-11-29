@@ -1,74 +1,33 @@
 "use client";
-import { userGetSavedGame } from "@/server/api/game";
-import { userRevealSolutions } from "@/server/api/solutions";
 import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
-import { User } from "@/server/db/schema";
-import { useEffect } from "react";
-import { useState } from "react";
-import { SAVE_STATE_LOCAL_STORAGE_KEY } from "./Game";
-import { SaveState } from "./Game";
 import { Button } from "../ui/button";
 import { ThumbsDown, TriangleAlert } from "lucide-react";
 import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
+import { SaveState, useSaveState } from "./useSaveState";
 
 export const Solutions = ({
-  user,
   date,
+  isLoggedIn,
+  savedGame,
   possibleWords,
   downvotes,
 }: {
-  user: User | null;
   date: string;
+  isLoggedIn: boolean;
+  savedGame: SaveState | null;
   possibleWords: string[];
   downvotes: string[];
 }) => {
-  const [foundWords, setFoundWords] = useState<string[]>([]);
-  const [showSolutions, setShowSolutions] = useState(false);
-
-  useEffect(() => {
-    const getSavedState = async () => {
-      let savedState: SaveState | null = null;
-      if (user) {
-        savedState = await userGetSavedGame(date);
-      } else {
-        const savedStateContent = localStorage.getItem(
-          SAVE_STATE_LOCAL_STORAGE_KEY,
-        );
-        if (!savedStateContent) {
-          return;
-        }
-        savedState = JSON.parse(savedStateContent) as SaveState;
-      }
-      if (savedState?.date !== date) {
-        return;
-      }
-      setShowSolutions(savedState.solutionsRevealed);
-      setFoundWords(savedState.foundWords);
-    };
-    getSavedState();
-  }, [date, user]);
-
-  const revealSolutions = async () => {
-    if (user) {
-      await userRevealSolutions(date);
-    } else {
-      localStorage.setItem(
-        SAVE_STATE_LOCAL_STORAGE_KEY,
-        JSON.stringify({
-          date,
-          foundWords,
-          solutionsRevealed: true,
-        }),
-      );
-    }
-    setShowSolutions(true);
-  };
+  const { foundWords, solutionsRevealed, setSolutionsRevealed } = useSaveState({
+    date,
+    savedGame,
+  });
 
   return (
     <div className="w-full px-2">
       <div className="w-full rounded-sm bg-white/10 px-2 py-1">
-        {!showSolutions ? (
+        {!solutionsRevealed ? (
           <div className="mb-8 mt-6 text-center">
             <p className="mb-2 font-semibold">
               <TriangleAlert className="inline size-4" /> Achtung: Das Spiel
@@ -78,7 +37,7 @@ export const Solutions = ({
               Du kannst weiterhin Wörter suchen, aber deine Punkte werden nicht
               mehr aktualisiert.
             </p>
-            <Button onClick={revealSolutions} size="lg">
+            <Button onClick={() => setSolutionsRevealed(true)} size="lg">
               Lösungen anzeigen
             </Button>
           </div>
@@ -110,7 +69,7 @@ export const Solutions = ({
                     <span className="text-white/50">
                       ({getWordScore(word)})
                     </span>
-                    {user && (
+                    {isLoggedIn && (
                       <span
                         onClick={(e) => {
                           e.stopPropagation();
