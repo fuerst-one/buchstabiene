@@ -14,8 +14,7 @@ import { isPangram } from "./utils";
 import { WordInput } from "./WordInput";
 import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
-import { useSaveState } from "./useSaveState";
-import { SaveState } from "./useSaveState";
+import { useSaveState, SaveState } from "./useSaveState";
 
 export const Game = ({
   gameData,
@@ -32,6 +31,7 @@ export const Game = ({
 
   const { foundWords, solutionsRevealed, setFoundWords } = useSaveState({
     date,
+    isLoggedIn,
     savedGame,
   });
 

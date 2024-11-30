@@ -21,6 +21,7 @@ export const Solutions = ({
 }) => {
   const { foundWords, solutionsRevealed, setSolutionsRevealed } = useSaveState({
     date,
+    isLoggedIn,
     savedGame,
   });
 

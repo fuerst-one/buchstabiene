@@ -1,3 +1,4 @@
+"use client";
 import { userUpdateSavedGame } from "@/server/api/game";
 import { userRevealSolutions } from "@/server/api/solutions";
 import { useState } from "react";
@@ -11,7 +12,7 @@ export type SaveState = {
 export const SAVE_STATE_LOCAL_STORAGE_KEY = "spelling-bee-save-state";
 
 export const getLocalStorageSaveState = () => {
-  const savedStateContent = localStorage.getItem(SAVE_STATE_LOCAL_STORAGE_KEY);
+  const savedStateContent = localStorage?.getItem(SAVE_STATE_LOCAL_STORAGE_KEY);
   if (!savedStateContent) {
     return;
   }
@@ -24,13 +25,15 @@ export const setLocalStorageSaveState = (saveState: SaveState) => {
 
 export const useSaveState = ({
   date,
+  isLoggedIn,
   savedGame,
 }: {
   date: string;
+  isLoggedIn: boolean;
   savedGame: SaveState | null;
 }) => {
   const [gameState, setGameState] = useState<SaveState>(() => {
-    if (savedGame?.date === date) {
+    if (isLoggedIn && savedGame) {
       return savedGame;
     }
     const localStorageSaveState = getLocalStorageSaveState();
@@ -46,7 +49,7 @@ export const useSaveState = ({
 
   const setFoundWords = async (foundWords: string[]) => {
     setGameState({ ...gameState, foundWords });
-    if (savedGame) {
+    if (isLoggedIn) {
       await userUpdateSavedGame(date, foundWords);
     } else {
       setLocalStorageSaveState({ ...gameState, foundWords });
@@ -55,7 +58,7 @@ export const useSaveState = ({
 
   const setSolutionsRevealed = async (solutionsRevealed: boolean) => {
     setGameState({ ...gameState, solutionsRevealed });
-    if (savedGame) {
+    if (isLoggedIn) {
       await userRevealSolutions(date);
     } else {
       setLocalStorageSaveState({ ...gameState, solutionsRevealed });
