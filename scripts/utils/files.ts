@@ -28,11 +28,15 @@ export const writeRemovedWordsFile = async (words: string[]) => {
 export const cacheDir = join(dataDir, "cache");
 const cacheHashDir = (hash: string) => join(cacheDir, hash);
 const cacheLogFile = join(cacheDir, "cache.txt");
-const appendCacheLogFile = async (hash: string) => {
-  return await fs.appendFile(cacheLogFile, `${hash}\n`, fileEncoding);
-};
 export const readCacheLogFile = async () => {
   return (await fs.readFile(cacheLogFile, fileEncoding)).split("\n");
+};
+const appendCacheLogFile = async (hash: string) => {
+  const log = (await fs.readFile(cacheLogFile, fileEncoding)).split("\n");
+  if (log.includes(hash)) {
+    return;
+  }
+  return await fs.appendFile(cacheLogFile, `${hash}\n`, fileEncoding);
 };
 const createCacheDirIfNotExists = async (hash: string) => {
   if (!existsSync(cacheHashDir(hash))) {
@@ -44,11 +48,10 @@ const createCacheDirIfNotExists = async (hash: string) => {
 
 const cacheWordsFile = (hash: string) => join(cacheHashDir(hash), "words.txt");
 export const writeWordFileCache = async (words: string[]) => {
-  const wordsHash = await getWordsHash(words);
-  await createCacheDirIfNotExists(wordsHash);
-  await appendCacheLogFile(wordsHash);
+  const hash = await getWordsHash(words);
+  await createCacheDirIfNotExists(hash);
   return await fs.writeFile(
-    cacheWordsFile(wordsHash),
+    cacheWordsFile(hash),
     words.join("\n"),
     fileEncoding,
   );

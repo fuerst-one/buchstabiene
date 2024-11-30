@@ -4,7 +4,7 @@ import { useState, useCallback, ComponentProps } from "react";
 import { Message } from "./utils";
 import { useWindowEventListener } from "@/lib/useWindowEventListener";
 import { Lock } from "lucide-react";
-import { shuffle } from "@/lib/shuffle";
+import { arrayShuffle } from "@/lib/arrayShuffle";
 
 export const WordInput = ({
   letterSet,
@@ -74,7 +74,7 @@ export const WordInput = ({
   }, [deleteLetter]);
 
   const shuffleLetters = useCallback(() => {
-    setOtherLetters((prev) => shuffle(prev));
+    setOtherLetters((prev) => arrayShuffle(prev));
   }, []);
 
   const LetterButton = useCallback(

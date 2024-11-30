@@ -4,6 +4,7 @@ import {
   dictionaryAmendments,
 } from "@/server/db/schema";
 import { inArray } from "drizzle-orm";
+import { AmendmentAffectedGames } from "./types";
 
 export const getAmendments = async () => {
   // Get dictionary amendments that need to be applied
@@ -18,45 +19,48 @@ export const getAmendments = async () => {
     .filter((amendment) => amendment.action === "remove")
     .flatMap((amendment) => amendment.words);
 
-  const amendmentIds = amendments.map((amendment) => amendment.id);
-
   console.log(
-    `Found ${amendmentIds.length} amendments with ${wordsToAdd.length} words to add and ${wordsToRemove.length} words to remove.`,
+    `Found ${amendments.length} amendments with ${wordsToAdd.length} words to add and ${wordsToRemove.length} words to remove.`,
   );
 
-  return { wordsToAdd, wordsToRemove, amendmentIds };
+  return amendments;
 };
 
 export const markAmendmentsApplied = async (
-  amendmentIds: number[],
-  affectedGames: { date: string }[],
+  affectedGames: AmendmentAffectedGames[],
   dryRun = true,
 ) => {
-  if (amendmentIds.length === 0) {
+  if (affectedGames.length === 0) {
     console.log("No amendments to mark as applied.");
     return;
   }
 
+  const amendmentIds = affectedGames.map(({ amendmentId }) => amendmentId);
+
   if (dryRun) {
     console.log("DRY RUN: Not updating dictionary amendments.");
+  } else {
+    // Update dictionary amendments to mark them as applied
+    await db
+      .update(dictionaryAmendments)
+      .set({ isApplied: true })
+      .where(inArray(dictionaryAmendments.id, amendmentIds));
+    console.log(`${amendmentIds.length} dictionary amendments completed.`);
+
+    // Link the amendments to the games
+    const result = await db
+      .insert(dictionaryAmendmentAffectedGames)
+      .values(
+        affectedGames.flatMap(({ dates, amendmentId }) =>
+          dates.map((date) => ({
+            gameDate: date,
+            amendmentId,
+          })),
+        ),
+      )
+      .returning();
+    console.log(
+      `${result.length} affected games linked to dictionary amendments.`,
+    );
   }
-
-  // Update dictionary amendments to mark them as applied
-  await db
-    .update(dictionaryAmendments)
-    .set({ isApplied: true })
-    .where(inArray(dictionaryAmendments.id, amendmentIds));
-  console.log(`${amendmentIds.length} dictionary amendments completed`);
-
-  // Create the dictionary amendment affected games to link the amendment to the games.
-  const amendmentId = amendmentIds.pop()!;
-  await db
-    .insert(dictionaryAmendmentAffectedGames)
-    .values(
-      affectedGames.map(({ date }) => ({
-        gameDate: date,
-        amendmentId,
-      })),
-    )
-    .returning();
 };

@@ -5,19 +5,19 @@ import {
   writeWordFileCache,
   writeWordsFile,
 } from "./files";
-import { unique } from "@/lib/unique";
+import { applyWordsChanges } from "./utils";
 
 /**
  * Amend word files in file system
  *
- * @param {string[]} words - Current words
+ * @param {string[]} currentWords - Current words
  * @param {string[]} wordsToAdd - Words to add
  * @param {string[]} wordsToRemove - Words to remove
  * @param {boolean} dryRun - Whether to run in dry run mode
  * @returns {string[]} New words
  */
 export const amendWordFiles = async (
-  words: string[],
+  currentWords: string[],
   wordsToAdd: string[],
   wordsToRemove: string[],
   dryRun = true,
@@ -25,14 +25,18 @@ export const amendWordFiles = async (
   console.log("Amending word files...");
 
   const removedWords = await readRemovedWordsFile();
-  const newRemovedWords = unique([...removedWords, ...wordsToRemove]).sort();
-  const newWords = unique([...words, ...wordsToAdd])
-    .filter((word) => !newRemovedWords.includes(word))
-    .sort();
 
-  console.log(`${wordsToAdd.length} words added.`);
-  console.log(`${wordsToRemove.length} words removed.`);
-  console.log(`${newWords.length} unique words left.`);
+  // Add wordsToRemove to removedWords
+  const newRemovedWords = applyWordsChanges(removedWords, wordsToRemove);
+
+  // Add wordsToAdd to words and remove wordsToRemove from words
+  const newWords = applyWordsChanges(currentWords, wordsToAdd, wordsToRemove);
+
+  console.log("Changes:");
+  console.log(`${currentWords.length} words before changes.`);
+  console.log(`${wordsToAdd.length} words to be added.`);
+  console.log(`${wordsToRemove.length} words to be removed.`);
+  console.log(`${newWords.length} unique words after changes.`);
 
   if (dryRun) {
     console.log("DRY RUN: Not amending word files.");
@@ -51,7 +55,14 @@ const main = async () => {
   const words = await readWordsFile();
   const wordsToAdd: string[] = [];
   const wordsToRemove: string[] = [];
-  await amendWordFiles(words, wordsToAdd, wordsToRemove, false);
+  const DRY_RUN = true;
+  const newWords = await amendWordFiles(
+    words,
+    wordsToAdd,
+    wordsToRemove,
+    DRY_RUN,
+  );
+  console.log(newWords);
 };
 
 if (require.main === module) {

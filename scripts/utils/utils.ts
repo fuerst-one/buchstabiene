@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { GameGenOptions, GameSource } from "./types";
 import { readCacheLogFile } from "./files";
+import { arrayUnique } from "@/lib/arrayUnique";
+import { arrayEqual } from "@/lib/arrayEqual";
 
 export const DEFAULT_GAME_GEN_OPTIONS: GameGenOptions = {
   letterSetFilter: {
@@ -28,6 +30,19 @@ export const getLatestWordsHash = async (): Promise<string> => {
   const hashes = await readCacheLogFile();
   return hashes[hashes.length - 1];
 };
+
+export const applyWordsChanges = (
+  oldWords: string[],
+  wordsToAdd?: string[],
+  wordsToRemove?: string[],
+) => {
+  return arrayUnique([...oldWords, ...(wordsToAdd || [])])
+    .filter((w) => !wordsToRemove || !wordsToRemove.includes(w))
+    .sort();
+};
+
+export const isWordsChanged = (oldWords: string[], newWords: string[]) =>
+  !arrayEqual(oldWords, newWords);
 
 export const logGameScoreDistribution = (games: GameSource[]) => {
   const scoreTable = Object.fromEntries(

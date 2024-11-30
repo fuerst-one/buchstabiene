@@ -5,6 +5,11 @@ export type GameSource = {
   possibleWords: string[];
 };
 
+export type AmendmentAffectedGames = {
+  amendmentId: number;
+  dates: string[];
+};
+
 export type LetterSetFilterOptions = {
   letters?: string[];
   maxCount?: number;

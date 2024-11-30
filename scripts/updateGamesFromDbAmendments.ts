@@ -6,9 +6,10 @@ import { amendWordFiles } from "./utils/amendWordFiles";
 import { removeGames } from "./utils/removeGames";
 import { insertGames } from "./utils/insertGames";
 import { generateGames } from "./utils/generateGames";
-import { shuffle } from "@/lib/shuffle";
+import { arrayShuffle } from "@/lib/arrayShuffle";
 import { markAmendmentsApplied, getAmendments } from "./utils/getAmendments";
-import { amendGames } from "./utils/amendGames";
+import { amendExistingGames } from "./utils/amendExistingGames";
+import { AmendmentAffectedGames } from "./utils/types";
 
 /**
  * Collects dictionary amendments from DB and updates games.
@@ -18,7 +19,7 @@ import { amendGames } from "./utils/amendGames";
  */
 export const updateGamesFromDbAmendments = async (
   options = DEFAULT_GAME_GEN_OPTIONS,
-  dryRun = false,
+  dryRun = true,
 ) => {
   console.log("Updating games...");
   console.log({ dryRun, currentDate: gameDateString() });
@@ -27,39 +28,61 @@ export const updateGamesFromDbAmendments = async (
   const words = await readWordsFile();
 
   // Get dictionary amendments
-  const { wordsToAdd, wordsToRemove, amendmentIds } = await getAmendments();
+  const amendments = await getAmendments();
 
-  // Update words with dictionary amendments from database
-  const newWords = await amendWordFiles(
-    words,
-    wordsToAdd,
-    wordsToRemove,
-    dryRun,
-  );
+  let newWords = words;
+  const affectedGames: AmendmentAffectedGames[] = [];
+
+  for (const amendment of amendments) {
+    const wordsToAdd = amendment.action === "add" ? amendment.words : [];
+    const wordsToRemove = amendment.action === "remove" ? amendment.words : [];
+
+    // Update words with dictionary amendments from database
+    newWords = await amendWordFiles(
+      newWords,
+      wordsToAdd,
+      wordsToRemove,
+      dryRun,
+    );
+
+    // Update games and saved games until including today with amendments
+    const { affectedGames: amendmentAffectedGames } = await amendExistingGames(
+      wordsToAdd,
+      wordsToRemove,
+      dryRun,
+    );
+
+    // Add affected games to the list
+    affectedGames.push({
+      amendmentId: amendment.id,
+      dates: amendmentAffectedGames.map((game) => game.date),
+    });
+  }
 
   // Skip games update if words hash is unchanged
   if ((await getWordsHash(newWords)) === (await getWordsHash(words))) {
-    console.log("Words hash unchanged, skipping games update");
+    console.log(
+      "Words hash unchanged, skipping games update but marking amendments as applied",
+    );
+    // Mark dictionary amendments as applied
+    await markAmendmentsApplied(affectedGames, dryRun);
     return;
   }
-
-  // Update games and saved games until including today with amendments
-  const { affectedGames } = await amendGames(wordsToAdd, wordsToRemove, dryRun);
 
   // Generate new games based on updated words
   const games = await generateGames(newWords, options);
   const filteredGames = await filterGames(games);
-  const shuffledGames = shuffle(filteredGames);
+  const shuffledGames = arrayShuffle(filteredGames);
 
   // Remove games after today and insert new games
   await removeGames("after_today", dryRun);
   await insertGames(shuffledGames, dryRun);
 
   // Mark dictionary amendments as applied
-  await markAmendmentsApplied(amendmentIds, affectedGames, dryRun);
+  await markAmendmentsApplied(affectedGames, dryRun);
 };
 
 if (require.main === module) {
-  const DRY_RUN = false;
+  const DRY_RUN = true;
   updateGamesFromDbAmendments(DEFAULT_GAME_GEN_OPTIONS, DRY_RUN);
 }
