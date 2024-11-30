@@ -45,7 +45,7 @@ export default async function GameByDateSolution({
       <GameNavigation dateString={dateString} activeLink="highscores" />
       <Suspense fallback={<div>Lädt...</div>}>
         <Highscores
-          user={user}
+          username={user?.name}
           highscores={highscores}
           winningScore={getWinningScore(gameData.possibleWords)}
           completedScore={getTotalScore(gameData.possibleWords)}

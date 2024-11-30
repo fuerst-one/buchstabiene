@@ -1,7 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { Highscore } from "@/server/api/highscores";
-import { User } from "@/server/db/schema";
 import { Lock, Trophy } from "lucide-react";
 import { stagesByPercentage } from "./Stage";
 
@@ -29,12 +28,12 @@ const getStageByScore = (
 };
 
 export const Highscores = ({
-  user,
+  username,
   highscores,
   winningScore,
   completedScore,
 }: {
-  user: User | null;
+  username?: string;
   highscores: Highscore[];
   winningScore: number;
   completedScore: number;
@@ -55,7 +54,7 @@ export const Highscores = ({
                   key={highscore.username}
                   className={cn(
                     "flex items-center justify-between whitespace-nowrap rounded-sm px-1 leading-7 text-white",
-                    highscore.username === user?.name
+                    highscore.username === username
                       ? "bg-yellow-500/30"
                       : "odd:bg-white/5",
                   )}

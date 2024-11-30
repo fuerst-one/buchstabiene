@@ -52,10 +52,20 @@ export const userGetPlayedGames = async () => {
 
 export const userUpdateSavedGame = async (
   date: string,
-  foundWords: string[],
+  newFoundWords: string[],
 ) => {
   const userId = (await serverSessionGuard()).user.id;
+
+  const previousSavedGame = await db.query.savedGames.findFirst({
+    where: (savedGames, { and, eq }) =>
+      and(eq(savedGames.date, date), eq(savedGames.userId, userId)),
+  });
+
   const updatedAt = new Date();
+  const foundWords = previousSavedGame
+    ? [...new Set([...previousSavedGame.foundWords, ...newFoundWords]).values()]
+    : newFoundWords;
+
   const inserted = await db
     .insert(savedGames)
     .values({
@@ -69,6 +79,7 @@ export const userUpdateSavedGame = async (
       set: { updatedAt, foundWords },
     })
     .returning();
+
   revalidatePath(`/spielen/[date]`, "page");
   return inserted.length > 0;
 };
