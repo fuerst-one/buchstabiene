@@ -16,7 +16,7 @@ export const WordInput = ({
   letterSet: string[];
   message: Message | null;
   isRevealed: boolean;
-  onSubmit: (word: string) => Promise<void>;
+  onSubmit: (word: string, callback: () => void) => Promise<void>;
   onCancelMessage: () => void;
 }) => {
   const mainLetter = letterSet[0];
@@ -31,9 +31,8 @@ export const WordInput = ({
     setSelectedLetters((prev) => prev.slice(0, -1));
   }, []);
 
-  const handleSubmit = useCallback(async () => {
-    await onSubmit(selectedLetters);
-    setSelectedLetters("");
+  const handleSubmit = useCallback(() => {
+    onSubmit(selectedLetters, () => setSelectedLetters(""));
   }, [selectedLetters, onSubmit]);
 
   useWindowEventListener(
