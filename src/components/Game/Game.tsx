@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { GameData } from "@/server/api/game";
 import {
   getTotalScore,
   getWordScore,
@@ -16,6 +15,7 @@ import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
 import { useSaveState, SaveState } from "./useSaveState";
 import { WordSuggestions } from "./WordSuggestions";
+import { decodeGameData } from "./encodeGame";
 
 export const Game = ({
   gameData,
@@ -23,12 +23,13 @@ export const Game = ({
   savedGame,
   downvotes,
 }: {
-  gameData: GameData;
+  gameData: string;
   isLoggedIn: boolean;
   savedGame: SaveState | null;
   downvotes: string[];
 }) => {
-  const { date, letterSet, possibleWords, winningScore } = gameData;
+  const { date, letterSet, possibleWords, winningScore } =
+    decodeGameData(gameData);
 
   const { foundWords, solutionsRevealed, setFoundWords } = useSaveState({
     date,

@@ -37,6 +37,7 @@ export default async function GameByDateSolution({
     );
   }
 
+  const { possibleWords } = gameData;
   const user = await getServerSessionUser();
   const highscores = await publicGetHighscoresByDate(dateString);
 
@@ -47,8 +48,8 @@ export default async function GameByDateSolution({
         <Highscores
           username={user?.name}
           highscores={highscores}
-          winningScore={getWinningScore(gameData.possibleWords)}
-          completedScore={getTotalScore(gameData.possibleWords)}
+          winningScore={getWinningScore(possibleWords)}
+          completedScore={getTotalScore(possibleWords)}
         />
       </Suspense>
     </>

@@ -4,7 +4,7 @@ import { userRevealSolutions } from "@/server/api/solutions";
 import { useState } from "react";
 
 export type SaveState = {
-  date: string;
+  date?: string;
   foundWords: string[];
   solutionsRevealed: boolean;
 };
