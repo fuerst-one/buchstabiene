@@ -104,13 +104,19 @@ export const savedGameRelations = relations(savedGames, ({ one }) => ({
   }),
 }));
 
-export const wordVotes = pgTable("word_votes", {
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  word: varchar("word", { length: 64 }).notNull(),
-  vote: integer("vote").notNull().default(0),
-});
+export const wordVotes = pgTable(
+  "word_votes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    word: varchar("word", { length: 64 }).notNull(),
+    vote: integer("vote").notNull().default(0),
+  },
+  (t) => ({
+    unq: unique().on(t.userId, t.word),
+  }),
+);
 export type WordVote = typeof wordVotes.$inferSelect;
 export type WordVoteInsert = typeof wordVotes.$inferInsert;
 export const wordVoteSchema = createSelectSchema(wordVotes);

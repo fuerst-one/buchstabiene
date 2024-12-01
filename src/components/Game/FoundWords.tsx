@@ -1,7 +1,7 @@
 "use client";
 import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
-import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
+import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
 import { ChevronDown, ThumbsDown } from "lucide-react";
 import { useState } from "react";
 
@@ -83,7 +83,7 @@ export const FoundWords = ({
                       onClick={() =>
                         downvotes.includes(word)
                           ? userDeleteWordVote(word)
-                          : userAddWordVote(word)
+                          : userAddWordVotes([word], -1)
                       }
                     />
                   </span>

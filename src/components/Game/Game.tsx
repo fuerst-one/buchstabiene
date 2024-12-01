@@ -15,6 +15,7 @@ import { WordInput } from "./WordInput";
 import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
 import { useSaveState, SaveState } from "./useSaveState";
+import { WordSuggestions } from "./WordSuggestions";
 
 export const Game = ({
   gameData,
@@ -141,6 +142,7 @@ export const Game = ({
         onSubmit={submitWord}
         onCancelMessage={cancelMessage}
       />
+      <WordSuggestions />
     </div>
   );
 };

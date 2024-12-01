@@ -3,7 +3,7 @@ import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ThumbsDown, TriangleAlert } from "lucide-react";
-import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
+import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
 import { SaveState, useSaveState } from "./useSaveState";
 
 export const Solutions = ({
@@ -86,7 +86,7 @@ export const Solutions = ({
                           onClick={() =>
                             downvotes.includes(word)
                               ? userDeleteWordVote(word)
-                              : userAddWordVote(word)
+                              : userAddWordVotes([word], -1)
                           }
                         />
                       </span>
