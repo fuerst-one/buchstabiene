@@ -121,11 +121,11 @@ export const WordInput = ({
         )}
       </div>
       <div className="flex flex-nowrap items-center justify-center">
-        <div className="-mx-[9px] flex flex-col items-center justify-center gap-[7px]">
+        <div className="mx-[-8px] flex flex-col items-center justify-center gap-[8px]">
           <LetterButton letter={otherLetters[0]} />
           <LetterButton letter={otherLetters[1]} />
         </div>
-        <div className="-mx-[9px] flex flex-col items-center justify-center gap-[7px]">
+        <div className="mx-[-8px] flex flex-col items-center justify-center gap-[8px]">
           <LetterButton letter={otherLetters[2]} />
           <LetterButton
             letter={mainLetter}
@@ -133,7 +133,7 @@ export const WordInput = ({
           />
           <LetterButton letter={otherLetters[3]} />
         </div>
-        <div className="-mx-[9px] flex flex-col items-center justify-center gap-[7px]">
+        <div className="mx-[-8px] flex flex-col items-center justify-center gap-[8px]">
           <LetterButton letter={otherLetters[4]} />
           <LetterButton letter={otherLetters[5]} />
         </div>
@@ -153,7 +153,7 @@ const HexagonButton = (props: ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
-        "h-[5rem] w-[6rem] select-none rounded-sm bg-white/20 text-2xl font-bold uppercase text-white",
+        "h-[5rem] w-[5.85rem] select-none rounded-sm bg-white/20 text-2xl font-bold uppercase text-white",
         { "scale-90": isActive },
         props.className,
       )}
