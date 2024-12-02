@@ -17,7 +17,6 @@ export const publicGetGameByDate = async (date: string) => {
   }
   const { letterSet, possibleWords } = game;
   return {
-    date,
     letterSet: letterSet.split(""),
     possibleWords,
     winningScore: getWinningScore(possibleWords),

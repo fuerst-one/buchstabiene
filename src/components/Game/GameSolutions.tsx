@@ -5,22 +5,21 @@ import { Button } from "../ui/button";
 import { ThumbsDown, TriangleAlert } from "lucide-react";
 import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
 import { SaveState, useSaveState } from "./useSaveState";
-import { decodeGameData } from "./encodeGame";
+import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
 
-export const Solutions = ({
+const GameSolutions = ({
   date,
+  solutions,
   isLoggedIn,
   savedGame,
-  possibleWords,
   downvotes,
 }: {
   date: string;
+  solutions: string[] | null;
   isLoggedIn: boolean;
   savedGame: SaveState | null;
-  possibleWords: string;
   downvotes: string[];
 }) => {
-  const words: string[] = decodeGameData(possibleWords);
   const { foundWords, solutionsRevealed, setSolutionsRevealed } = useSaveState({
     date,
     isLoggedIn,
@@ -56,7 +55,7 @@ export const Solutions = ({
             </div>
             <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 pb-3 pt-1">
               <div className="columns-2 space-x-1 space-y-1">
-                {words.toSorted().map((word) => (
+                {solutions?.toSorted().map((word) => (
                   <div
                     key={word}
                     className={cn(
@@ -103,3 +102,5 @@ export const Solutions = ({
     </div>
   );
 };
+
+export const GameSolutionsEncrypted = wrapWithSolutionsDecrypter(GameSolutions);

@@ -1,4 +1,3 @@
-import { Game } from "@/components/Game/Game";
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
@@ -7,7 +6,8 @@ import { publicGetGameByDate, userGetSavedGame } from "@/server/api/game";
 import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { encodeGameData } from "@/components/Game/encodeGame";
+import { encryptSolutions } from "@/components/Game/encryptSolutions";
+import { GameEncrypted } from "@/components/Game/Game";
 
 // Cache for 1 day
 export const revalidate = 86400;
@@ -37,7 +37,7 @@ export default async function GameByDate({
     );
   }
 
-  const gameDataEncoded = encodeGameData(gameData);
+  const solutionsEncrypted = await encryptSolutions(gameData.possibleWords);
   const user = await getServerSessionUser();
   const savedGame = await userGetSavedGame(dateString);
   const downvotes = (await userGetWordVotes())
@@ -49,8 +49,11 @@ export default async function GameByDate({
     <>
       <GameNavigation dateString={dateString} activeLink="game" />
       <Suspense fallback={<div>Lädt...</div>}>
-        <Game
-          gameData={gameDataEncoded}
+        <GameEncrypted
+          date={dateString}
+          solutionsEncrypted={solutionsEncrypted}
+          letterSet={gameData.letterSet}
+          winningScore={gameData.winningScore}
           isLoggedIn={!!user}
           savedGame={savedGame}
           downvotes={downvotes}

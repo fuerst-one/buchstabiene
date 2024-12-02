@@ -1,5 +1,5 @@
 import { GameNavigation } from "@/components/Game/GameNavigation";
-import { Highscores } from "@/components/Game/Highscores";
+import { GameHighscores } from "@/components/Game/GameHighscores";
 import { getTotalScore, getWinningScore } from "@/components/Game/utils";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
@@ -13,7 +13,7 @@ import { Suspense } from "react";
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-export default async function GameByDateSolution({
+export default async function GameByDateHighscores({
   params,
 }: {
   params: Promise<{ date: string }>;
@@ -45,7 +45,7 @@ export default async function GameByDateSolution({
     <>
       <GameNavigation dateString={dateString} activeLink="highscores" />
       <Suspense fallback={<div>Lädt...</div>}>
-        <Highscores
+        <GameHighscores
           username={user?.name}
           highscores={highscores}
           winningScore={getWinningScore(possibleWords)}

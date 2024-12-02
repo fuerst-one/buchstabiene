@@ -24,7 +24,7 @@ export const WordInput = ({
   const [selectedLetters, setSelectedLetters] = useState<string>("");
 
   const addSelectedLetter = useCallback((letter: string) => {
-    setSelectedLetters((prev) => prev + letter);
+    setSelectedLetters((prev) => prev + (letter || ""));
   }, []);
 
   const deleteLetter = useCallback(() => {

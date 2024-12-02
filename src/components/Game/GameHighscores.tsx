@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Highscore } from "@/server/api/highscores";
 import { Lock, Trophy } from "lucide-react";
-import { stagesByPercentage } from "./Stage";
+import { stagesByPercentage } from "@/components/Game/Stage";
 
 const getStageByScore = (
   currentScore: number,
@@ -27,7 +27,7 @@ const getStageByScore = (
   return stagesByScore[currentStageIndex];
 };
 
-export const Highscores = ({
+export const GameHighscores = ({
   username,
   highscores,
   winningScore,

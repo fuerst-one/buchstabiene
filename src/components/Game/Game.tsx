@@ -15,22 +15,25 @@ import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
 import { useSaveState, SaveState } from "./useSaveState";
 import { WordSuggestions } from "./WordSuggestions";
-import { decodeGameData } from "./encodeGame";
+import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
 
-export const Game = ({
-  gameData,
+const Game = ({
+  date,
+  letterSet,
+  winningScore,
+  solutions,
   isLoggedIn,
   savedGame,
   downvotes,
 }: {
-  gameData: string;
+  date: string;
+  letterSet: string[];
+  winningScore: number;
+  solutions: string[] | null;
   isLoggedIn: boolean;
   savedGame: SaveState | null;
   downvotes: string[];
 }) => {
-  const { date, letterSet, possibleWords, winningScore } =
-    decodeGameData(gameData);
-
   const { foundWords, solutionsRevealed, setFoundWords } = useSaveState({
     date,
     isLoggedIn,
@@ -88,7 +91,7 @@ export const Game = ({
     if (foundWords?.includes(word)) {
       return await flashMessage({ type: "duplicate", callback });
     }
-    if (!possibleWords.includes(word)) {
+    if (!solutions?.includes(word)) {
       return await flashMessage({ type: "notInWordList", callback });
     }
 
@@ -110,7 +113,7 @@ export const Game = ({
     if (oldScore < winningScore && newScore >= winningScore) {
       setShowWinningDialog(true);
     }
-    if (newFoundWords.length === possibleWords.length) {
+    if (newFoundWords.length === solutions?.length) {
       setShowCompletedDialog(true);
     }
   };
@@ -128,12 +131,12 @@ export const Game = ({
       <Stage
         foundWords={foundWords}
         winningScore={winningScore}
-        completed={foundWords?.length === possibleWords.length}
+        completed={foundWords?.length === solutions?.length}
       />
       <FoundWords
         isLoggedIn={isLoggedIn}
         foundWords={foundWords}
-        possibleWords={possibleWords}
+        solutions={solutions}
         downvotes={downvotes}
       />
       <WordInput
@@ -147,3 +150,5 @@ export const Game = ({
     </div>
   );
 };
+
+export const GameEncrypted = wrapWithSolutionsDecrypter(Game);
