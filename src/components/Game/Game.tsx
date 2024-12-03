@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { GameData } from "@/server/api/game";
 import {
   getTotalScore,
   getWordScore,
@@ -14,24 +13,30 @@ import { isPangram } from "./utils";
 import { WordInput } from "./WordInput";
 import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
-import { useSaveState } from "./useSaveState";
-import { SaveState } from "./useSaveState";
+import { useSaveState, SaveState } from "./useSaveState";
+import { WordSuggestions } from "./WordSuggestions";
+import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
 
-export const Game = ({
-  gameData,
+const Game = ({
+  date,
+  letterSet,
+  winningScore,
+  solutions,
   isLoggedIn,
   savedGame,
   downvotes,
 }: {
-  gameData: GameData;
+  date: string;
+  letterSet: string[];
+  winningScore: number;
+  solutions: string[] | null;
   isLoggedIn: boolean;
   savedGame: SaveState | null;
   downvotes: string[];
 }) => {
-  const { date, letterSet, possibleWords, winningScore } = gameData;
-
   const { foundWords, solutionsRevealed, setFoundWords } = useSaveState({
     date,
+    isLoggedIn,
     savedGame,
   });
 
@@ -42,15 +47,25 @@ export const Game = ({
   const [showWinningDialog, setShowWinningDialog] = useState(false);
   const [showCompletedDialog, setShowCompletedDialog] = useState(false);
 
-  const flashMessage = async (messageType: MessageType, score?: number) => {
+  const flashMessage = async ({
+    type,
+    score,
+    callback,
+  }: {
+    type: MessageType;
+    score?: number;
+    callback?: () => void;
+  }) => {
+    setMessage({ ...messages[type], score });
     return new Promise<void>((resolve) => {
-      setMessage({ ...messages[messageType], score });
-      const timeout = setTimeout(() => {
-        setMessage(null);
-        setMessageTimeout(null);
-        resolve();
-      }, 1000);
-      setMessageTimeout(timeout);
+      setMessageTimeout(
+        setTimeout(() => {
+          callback?.();
+          setMessageTimeout(null);
+          setMessage(null);
+          resolve();
+        }, 1000),
+      );
     });
   };
 
@@ -63,21 +78,21 @@ export const Game = ({
     setMessage(null);
   };
 
-  const submitWord = async (word: string) => {
+  const submitWord = async (word: string, callback: () => void) => {
     if (message) {
       return;
     }
     if (word.length < 4) {
-      return await flashMessage("tooShort");
+      return await flashMessage({ type: "tooShort", callback });
     }
     if (!word.includes(letterSet[0])) {
-      return await flashMessage("centerMissing");
+      return await flashMessage({ type: "centerMissing", callback });
     }
     if (foundWords?.includes(word)) {
-      return await flashMessage("duplicate");
+      return await flashMessage({ type: "duplicate", callback });
     }
-    if (!possibleWords.includes(word)) {
-      return await flashMessage("notInWordList");
+    if (!solutions?.includes(word)) {
+      return await flashMessage({ type: "notInWordList", callback });
     }
 
     const oldFoundWords = foundWords ?? [];
@@ -86,19 +101,19 @@ export const Game = ({
       setFoundWords(newFoundWords);
     }
 
-    const wordScore = getWordScore(word);
+    const score = getWordScore(word);
     if (isPangram(word)) {
-      await flashMessage("pangram", wordScore);
+      await flashMessage({ type: "pangram", score, callback });
     } else {
-      await flashMessage("correct", wordScore);
+      await flashMessage({ type: "correct", score, callback });
     }
 
     const oldScore = getTotalScore(oldFoundWords);
-    const newScore = oldScore + wordScore;
+    const newScore = oldScore + score;
     if (oldScore < winningScore && newScore >= winningScore) {
       setShowWinningDialog(true);
     }
-    if (newFoundWords.length === possibleWords.length) {
+    if (newFoundWords.length === solutions?.length) {
       setShowCompletedDialog(true);
     }
   };
@@ -116,12 +131,12 @@ export const Game = ({
       <Stage
         foundWords={foundWords}
         winningScore={winningScore}
-        completed={foundWords?.length === possibleWords.length}
+        completed={foundWords?.length === solutions?.length}
       />
       <FoundWords
         isLoggedIn={isLoggedIn}
         foundWords={foundWords}
-        possibleWords={possibleWords}
+        solutions={solutions}
         downvotes={downvotes}
       />
       <WordInput
@@ -131,6 +146,9 @@ export const Game = ({
         onSubmit={submitWord}
         onCancelMessage={cancelMessage}
       />
+      <WordSuggestions />
     </div>
   );
 };
+
+export const GameEncrypted = wrapWithSolutionsDecrypter(Game);

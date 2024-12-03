@@ -1,23 +1,23 @@
 "use client";
 import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
-import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
+import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
 import { ChevronDown, ThumbsDown } from "lucide-react";
 import { useState } from "react";
 
 export const FoundWords = ({
   isLoggedIn,
   foundWords,
-  possibleWords,
+  solutions,
   downvotes,
 }: {
   isLoggedIn: boolean;
   foundWords: string[] | null;
-  possibleWords: string[];
+  solutions: string[] | null;
   downvotes: string[];
 }) => {
   const [showAllFoundWords, setShowAllFoundWords] = useState(false);
-  const wordsLeft = possibleWords.length - (foundWords?.length ?? 0);
+  const wordsLeft = (solutions?.length ?? 0) - (foundWords?.length ?? 0);
 
   return (
     <div
@@ -37,14 +37,8 @@ export const FoundWords = ({
             ))}
         </div>
         <span className="ml-0 mr-auto whitespace-nowrap text-white/50">
-          {foundWords ? (
-            <>
-              {foundWords && foundWords.length > 5 ? "..." : ""} (
-              {foundWords?.length} Wörter)
-            </>
-          ) : (
-            "Lädt..."
-          )}
+          {foundWords && foundWords.length > 5 ? "..." : ""} (
+          {foundWords?.length} Wörter)
         </span>
         <ChevronDown
           className={cn("ml-1 size-4 shrink-0", {
@@ -83,7 +77,7 @@ export const FoundWords = ({
                       onClick={() =>
                         downvotes.includes(word)
                           ? userDeleteWordVote(word)
-                          : userAddWordVote(word)
+                          : userAddWordVotes([word], -1)
                       }
                     />
                   </span>

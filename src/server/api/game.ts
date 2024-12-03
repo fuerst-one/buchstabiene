@@ -1,12 +1,14 @@
 "use server";
-import { savedGames } from "../db/schema";
+import { games, savedGames } from "../db/schema";
 import { db } from "../db/db";
 import {
   getServerSessionUser,
+  serverAdminGuard,
   serverSessionGuard,
 } from "@/zustand/useServerAuth";
 import { getWinningScore } from "@/components/Game/utils";
 import { revalidatePath } from "next/cache";
+import { asc, count } from "drizzle-orm";
 
 export const publicGetGameByDate = async (date: string) => {
   const game = await db.query.games.findFirst({
@@ -17,7 +19,6 @@ export const publicGetGameByDate = async (date: string) => {
   }
   const { letterSet, possibleWords } = game;
   return {
-    date,
     letterSet: letterSet.split(""),
     possibleWords,
     winningScore: getWinningScore(possibleWords),
@@ -52,10 +53,20 @@ export const userGetPlayedGames = async () => {
 
 export const userUpdateSavedGame = async (
   date: string,
-  foundWords: string[],
+  newFoundWords: string[],
 ) => {
   const userId = (await serverSessionGuard()).user.id;
+
+  const previousSavedGame = await db.query.savedGames.findFirst({
+    where: (savedGames, { and, eq }) =>
+      and(eq(savedGames.date, date), eq(savedGames.userId, userId)),
+  });
+
   const updatedAt = new Date();
+  const foundWords = previousSavedGame
+    ? [...new Set([...previousSavedGame.foundWords, ...newFoundWords]).values()]
+    : newFoundWords;
+
   const inserted = await db
     .insert(savedGames)
     .values({
@@ -69,6 +80,23 @@ export const userUpdateSavedGame = async (
       set: { updatedAt, foundWords },
     })
     .returning();
+
   revalidatePath(`/spielen/[date]`, "page");
   return inserted.length > 0;
+};
+
+export const adminGetRandomGame = async () => {
+  await serverAdminGuard();
+
+  const [{ count: gamesCount }] = await db
+    .select({ count: count() })
+    .from(games);
+  const randomIndex = Math.floor(Math.random() * gamesCount);
+  const [{ date }] = await db
+    .select()
+    .from(games)
+    .orderBy(asc(games.date))
+    .offset(randomIndex);
+
+  return publicGetGameByDate(date);
 };

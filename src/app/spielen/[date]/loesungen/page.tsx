@@ -1,5 +1,5 @@
 import { GameNavigation } from "@/components/Game/GameNavigation";
-import { Solutions } from "@/components/Game/Solutions";
+import { GameSolutionsEncrypted } from "@/components/Game/GameSolutions";
 import { dayjsTz } from "@/dayjs";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { userGetWordVotes } from "@/server/api/wordVotes";
@@ -7,6 +7,7 @@ import { publicGetGameByDate, userGetSavedGame } from "@/server/api/game";
 import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { encryptSolutions } from "@/components/Game/encryptSolutions";
 
 // Cache for 1 day
 export const revalidate = 86400;
@@ -36,20 +37,23 @@ export default async function GameByDateSolution({
     );
   }
 
+  const solutionsEncrypted = await encryptSolutions(gameData.possibleWords);
   const user = await getServerSessionUser();
   const savedGame = await userGetSavedGame(dateString);
-  const downvotes = (await userGetWordVotes()).map((downvote) => downvote.word);
-  const { date, possibleWords } = gameData;
+  const downvotes = (await userGetWordVotes())
+    .filter((downvote) => gameData.possibleWords.includes(downvote.word))
+    .filter((downvote) => downvote.vote < 0)
+    .map((downvote) => downvote.word);
 
   return (
     <>
       <GameNavigation dateString={dateString} activeLink="loesungen" />
       <Suspense fallback={<div>Lädt...</div>}>
-        <Solutions
-          date={date}
+        <GameSolutionsEncrypted
+          solutionsEncrypted={solutionsEncrypted}
+          date={dateString}
           isLoggedIn={!!user}
           savedGame={savedGame}
-          possibleWords={possibleWords}
           downvotes={downvotes}
         />
       </Suspense>

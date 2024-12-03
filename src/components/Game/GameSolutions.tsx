@@ -3,24 +3,29 @@ import { isPangram, getWordScore } from "./utils";
 import { capitalize, cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ThumbsDown, TriangleAlert } from "lucide-react";
-import { userAddWordVote, userDeleteWordVote } from "@/server/api/wordVotes";
+import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
 import { SaveState, useSaveState } from "./useSaveState";
+import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
 
-export const Solutions = ({
+export const GameSolutions = ({
   date,
+  solutions,
   isLoggedIn,
   savedGame,
-  possibleWords,
   downvotes,
+  isAdmin,
 }: {
   date: string;
+  solutions: string[] | null;
   isLoggedIn: boolean;
   savedGame: SaveState | null;
-  possibleWords: string[];
   downvotes: string[];
+  isAdmin?: boolean;
 }) => {
   const { foundWords, solutionsRevealed, setSolutionsRevealed } = useSaveState({
     date,
+    isLoggedIn,
+    isAdmin,
     savedGame,
   });
 
@@ -53,7 +58,7 @@ export const Solutions = ({
             </div>
             <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 pb-3 pt-1">
               <div className="columns-2 space-x-1 space-y-1">
-                {possibleWords.toSorted().map((word) => (
+                {solutions?.toSorted().map((word) => (
                   <div
                     key={word}
                     className={cn(
@@ -69,7 +74,7 @@ export const Solutions = ({
                     <span className="text-white/50">
                       ({getWordScore(word)})
                     </span>
-                    {isLoggedIn && (
+                    {(isLoggedIn || isAdmin) && (
                       <span
                         onClick={(e) => {
                           e.stopPropagation();
@@ -85,7 +90,7 @@ export const Solutions = ({
                           onClick={() =>
                             downvotes.includes(word)
                               ? userDeleteWordVote(word)
-                              : userAddWordVote(word)
+                              : userAddWordVotes([word], -1)
                           }
                         />
                       </span>
@@ -100,3 +105,5 @@ export const Solutions = ({
     </div>
   );
 };
+
+export const GameSolutionsEncrypted = wrapWithSolutionsDecrypter(GameSolutions);

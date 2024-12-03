@@ -19,11 +19,15 @@ export const userGetWordVotes = async () => {
   });
 };
 
-export const userAddWordVote = async (word: string, vote = -1) => {
+export const userAddWordVotes = async (words: string[], vote = -1) => {
   const userId = (await serverSessionGuard()).user.id;
   const inserted = await db
     .insert(wordVotes)
-    .values({ userId, word, vote })
+    .values(words.map((word) => ({ userId, word, vote })))
+    .onConflictDoUpdate({
+      target: [wordVotes.userId, wordVotes.word],
+      set: { vote },
+    })
     .returning();
   revalidatePath(`/spielen/[date]`, "page");
   return inserted.length > 0;
