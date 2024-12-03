@@ -7,22 +7,25 @@ import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
 import { SaveState, useSaveState } from "./useSaveState";
 import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
 
-const GameSolutions = ({
+export const GameSolutions = ({
   date,
   solutions,
   isLoggedIn,
   savedGame,
   downvotes,
+  isAdmin,
 }: {
   date: string;
   solutions: string[] | null;
   isLoggedIn: boolean;
   savedGame: SaveState | null;
   downvotes: string[];
+  isAdmin?: boolean;
 }) => {
   const { foundWords, solutionsRevealed, setSolutionsRevealed } = useSaveState({
     date,
     isLoggedIn,
+    isAdmin,
     savedGame,
   });
 
@@ -71,7 +74,7 @@ const GameSolutions = ({
                     <span className="text-white/50">
                       ({getWordScore(word)})
                     </span>
-                    {isLoggedIn && (
+                    {(isLoggedIn || isAdmin) && (
                       <span
                         onClick={(e) => {
                           e.stopPropagation();

@@ -1,12 +1,14 @@
 "use server";
-import { savedGames } from "../db/schema";
+import { games, savedGames } from "../db/schema";
 import { db } from "../db/db";
 import {
   getServerSessionUser,
+  serverAdminGuard,
   serverSessionGuard,
 } from "@/zustand/useServerAuth";
 import { getWinningScore } from "@/components/Game/utils";
 import { revalidatePath } from "next/cache";
+import { asc, count } from "drizzle-orm";
 
 export const publicGetGameByDate = async (date: string) => {
   const game = await db.query.games.findFirst({
@@ -81,4 +83,20 @@ export const userUpdateSavedGame = async (
 
   revalidatePath(`/spielen/[date]`, "page");
   return inserted.length > 0;
+};
+
+export const adminGetRandomGame = async () => {
+  await serverAdminGuard();
+
+  const [{ count: gamesCount }] = await db
+    .select({ count: count() })
+    .from(games);
+  const randomIndex = Math.floor(Math.random() * gamesCount);
+  const [{ date }] = await db
+    .select()
+    .from(games)
+    .orderBy(asc(games.date))
+    .offset(randomIndex);
+
+  return publicGetGameByDate(date);
 };
