@@ -34,8 +34,7 @@ export const updateGamesFromDbAmendments = async (
   const affectedGames: AmendmentAffectedGames[] = [];
 
   for (const amendment of amendments) {
-    const wordsToAdd = amendment.action === "add" ? amendment.words : [];
-    const wordsToRemove = amendment.action === "remove" ? amendment.words : [];
+    const { wordsToAdd, wordsToRemove } = amendment;
 
     // Update words with dictionary amendments from database
     newWords = await amendWordFiles(

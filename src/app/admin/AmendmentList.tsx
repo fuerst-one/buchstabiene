@@ -34,14 +34,14 @@ export const getWordVotesWithCount = (
 };
 
 export const AmendmentList = ({
-  wordVotes,
   label,
+  wordVotes,
   selectedWords,
   onChangeSelectedWords,
   onAddWordVotes,
 }: {
-  wordVotes: WordVoteWithCount[];
   label: string;
+  wordVotes: WordVoteWithCount[];
   selectedWords: string[];
   onChangeSelectedWords: Dispatch<SetStateAction<string[]>>;
   onAddWordVotes: (words: string[]) => Promise<boolean | void>;

@@ -12,12 +12,11 @@ export const getAmendments = async () => {
     where: (dictionaryAmendments, { eq, and }) =>
       and(eq(dictionaryAmendments.isApplied, false)),
   });
-  const wordsToAdd = amendments
-    .filter((amendment) => amendment.action === "add")
-    .flatMap((amendment) => amendment.words);
-  const wordsToRemove = amendments
-    .filter((amendment) => amendment.action === "remove")
-    .flatMap((amendment) => amendment.words);
+
+  const wordsToAdd = amendments.flatMap((amendment) => amendment.wordsToAdd);
+  const wordsToRemove = amendments.flatMap(
+    (amendment) => amendment.wordsToRemove,
+  );
 
   console.log(
     `Found ${amendments.length} amendments with ${wordsToAdd.length} words to add and ${wordsToRemove.length} words to remove.`,

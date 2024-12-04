@@ -11,7 +11,9 @@ import { createSelectSchema } from "drizzle-zod";
 import { primaryKey } from "drizzle-orm/pg-core";
 import { boolean } from "drizzle-orm/pg-core";
 import { json } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
+
+const jsonStringArray = sql<string[]>`(JSON_ARRAY())`;
 
 export const users = pgTable("users", {
   id: text("id").notNull().primaryKey().$defaultFn(crypto.randomUUID),
@@ -63,7 +65,7 @@ export const games = pgTable("games", {
   possibleWords: json("possible_words")
     .$type<string[]>()
     .notNull()
-    .$defaultFn(() => []),
+    .default(jsonStringArray),
 });
 export type Game = typeof games.$inferSelect;
 export type GameInsert = typeof games.$inferInsert;
@@ -82,7 +84,7 @@ export const savedGames = pgTable(
     foundWords: json("found_words")
       .$type<string[]>()
       .notNull()
-      .$defaultFn(() => []),
+      .default(jsonStringArray),
     solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
   },
   (t) => ({
@@ -132,11 +134,14 @@ export const dictionaryAmendments = pgTable("dictionary_amendments", {
   id: serial("id").notNull().primaryKey(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   reason: text("reason").notNull(),
-  action: text("action").notNull(),
-  words: json("words")
+  wordsToAdd: json("words_to_add")
     .$type<string[]>()
     .notNull()
-    .$defaultFn(() => []),
+    .default(jsonStringArray),
+  wordsToRemove: json("words_to_remove")
+    .$type<string[]>()
+    .notNull()
+    .default(jsonStringArray),
   isApplied: boolean("is_applied").notNull().default(false),
 });
 export type DictionaryAmendment = typeof dictionaryAmendments.$inferSelect;
