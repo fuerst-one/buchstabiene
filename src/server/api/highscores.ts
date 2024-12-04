@@ -12,7 +12,7 @@ export const publicGetHighscoresByDate = async (date: string) => {
   const highscores = savedGames.map((savedGame) => ({
     username: savedGame.user.name,
     foundWords: savedGame.foundWords,
-    isRevealed: savedGame.solutionsRevealed,
+    isRevealed: savedGame.solutionsRevealedAt,
     score: getTotalScore(savedGame.foundWords),
   }));
 

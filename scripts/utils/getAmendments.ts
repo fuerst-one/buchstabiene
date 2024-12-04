@@ -9,8 +9,8 @@ import { AmendmentAffectedGames } from "./types";
 export const getAmendments = async () => {
   // Get dictionary amendments that need to be applied
   const amendments = await db.query.dictionaryAmendments.findMany({
-    where: (dictionaryAmendments, { eq, and }) =>
-      and(eq(dictionaryAmendments.isApplied, false)),
+    where: (dictionaryAmendments, { isNotNull }) =>
+      isNotNull(dictionaryAmendments.appliedAt),
   });
 
   const wordsToAdd = amendments.flatMap((amendment) => amendment.wordsToAdd);
@@ -42,7 +42,7 @@ export const markAmendmentsApplied = async (
     // Update dictionary amendments to mark them as applied
     await db
       .update(dictionaryAmendments)
-      .set({ isApplied: true })
+      .set({ appliedAt: new Date() })
       .where(inArray(dictionaryAmendments.id, amendmentIds));
     console.log(`${amendmentIds.length} dictionary amendments completed.`);
 

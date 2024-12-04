@@ -4,6 +4,8 @@ import { db } from "@/server/db/db";
 import { inArray } from "drizzle-orm";
 import { dictionaryAmendments, wordVotes } from "../db/schema";
 import { revalidatePath } from "next/cache";
+import { publicGetGameByDate } from "./game";
+import { isPossibleWord } from "@/components/Game/utils";
 
 export type AmendmentReason = "manual_action" | "automatic_action";
 
@@ -40,4 +42,50 @@ export const adminCreateDictionaryAmendment = async (
   revalidatePath("/admin", "page");
 
   return dictionaryAmendment;
+};
+
+export type AmendmentEffect = {
+  amendmentId: number;
+  createdAt: Date;
+  appliedAt: Date | null;
+  reason: string;
+  wordsAdded: string[];
+  wordsRemoved: string[];
+};
+export const publicGetAmendmentsAffectingGame = async (date: string) => {
+  const game = await publicGetGameByDate(date);
+  if (!game) {
+    return [];
+  }
+
+  const amendments = await db.query.dictionaryAmendmentAffectedGames.findMany({
+    where: (dictionaryAmendmentAffectedGames, { eq }) =>
+      eq(dictionaryAmendmentAffectedGames.gameDate, date),
+    with: {
+      dictionaryAmendment: true,
+    },
+  });
+
+  const amendmentEffects: AmendmentEffect[] = [];
+  for (const amendment of amendments) {
+    if (!amendment.dictionaryAmendment.appliedAt) {
+      continue;
+    }
+    const wordsAdded = amendment.dictionaryAmendment.wordsToAdd.filter((word) =>
+      game.possibleWords.includes(word),
+    );
+    const wordsRemoved = amendment.dictionaryAmendment.wordsToRemove.filter(
+      (word) => isPossibleWord(word, game.letterSet),
+    );
+    amendmentEffects.push({
+      amendmentId: amendment.dictionaryAmendment.id,
+      createdAt: amendment.dictionaryAmendment.createdAt,
+      appliedAt: amendment.dictionaryAmendment.appliedAt,
+      reason: amendment.dictionaryAmendment.reason,
+      wordsAdded,
+      wordsRemoved,
+    });
+  }
+
+  return amendmentEffects;
 };

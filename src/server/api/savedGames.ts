@@ -9,7 +9,18 @@ export const userRevealSolutions = async (date: string) => {
   const userId = (await serverSessionGuard()).user.id;
   const updated = await db
     .update(savedGames)
-    .set({ solutionsRevealed: true })
+    .set({ solutionsRevealedAt: new Date() })
+    .where(and(eq(savedGames.date, date), eq(savedGames.userId, userId)))
+    .returning();
+  revalidatePath(`/spielen/[date]`, "page");
+  return updated.length > 0;
+};
+
+export const userDismissAmendments = async (date: string) => {
+  const userId = (await serverSessionGuard()).user.id;
+  const updated = await db
+    .update(savedGames)
+    .set({ amendmentsDismissedAt: new Date() })
     .where(and(eq(savedGames.date, date), eq(savedGames.userId, userId)))
     .returning();
   revalidatePath(`/spielen/[date]`, "page");

@@ -1,12 +1,36 @@
 "use client";
-import { userUpdateSavedGame } from "@/server/api/game";
-import { userRevealSolutions } from "@/server/api/solutions";
+import { gameDateDate } from "@/lib/DateFormat";
+import { AmendmentEffect } from "@/server/api/dictionaryAmendments";
+import { SavedGame, userUpdateSavedGame } from "@/server/api/game";
+import {
+  userRevealSolutions,
+  userDismissAmendments,
+} from "@/server/api/savedGames";
 import { useState } from "react";
 
 export type SaveState = {
   date?: string;
   foundWords: string[];
-  solutionsRevealed: boolean;
+  solutionsRevealedAt: Date | null;
+  amendmentsDismissed: boolean;
+  amendmentsDismissedAt: Date | null;
+};
+
+const isAmendmentsDismissed = (
+  amendments: AmendmentEffect[] | undefined,
+  amendmentsDismissedAt: Date | null,
+) => {
+  if (!amendments?.length) {
+    return true;
+  }
+  if (!amendmentsDismissedAt) {
+    return false;
+  }
+  return amendments.every((amendment) =>
+    gameDateDate(amendmentsDismissedAt).isAfter(
+      gameDateDate(amendment.appliedAt),
+    ),
+  );
 };
 
 export const SAVE_STATE_LOCAL_STORAGE_KEY = "spelling-bee-save-state";
@@ -26,17 +50,23 @@ export const setLocalStorageSaveState = (saveState: SaveState) => {
 export const useSaveState = ({
   date,
   isLoggedIn,
-  isAdmin,
   savedGame,
+  amendments,
 }: {
   date: string;
   isLoggedIn: boolean;
-  isAdmin?: boolean;
-  savedGame: SaveState | null;
+  savedGame: SavedGame | null;
+  amendments?: AmendmentEffect[];
 }) => {
   const [gameState, setGameState] = useState<SaveState>(() => {
     if (isLoggedIn && savedGame) {
-      return savedGame;
+      return {
+        ...savedGame,
+        amendmentsDismissed: isAmendmentsDismissed(
+          amendments,
+          savedGame.amendmentsDismissedAt,
+        ),
+      };
     }
     const localStorageSaveState = getLocalStorageSaveState();
     if (localStorageSaveState?.date === date) {
@@ -45,7 +75,9 @@ export const useSaveState = ({
     return {
       date,
       foundWords: [],
-      solutionsRevealed: isAdmin ?? false,
+      solutionsRevealedAt: null,
+      amendmentsDismissed: true,
+      amendmentsDismissedAt: null,
     };
   });
 
@@ -58,14 +90,39 @@ export const useSaveState = ({
     }
   };
 
-  const setSolutionsRevealed = async (solutionsRevealed: boolean) => {
-    setGameState({ ...gameState, solutionsRevealed });
+  const setSolutionsRevealed = async () => {
+    setGameState({ ...gameState, solutionsRevealedAt: new Date() });
     if (isLoggedIn) {
       await userRevealSolutions(date);
     } else {
-      setLocalStorageSaveState({ ...gameState, solutionsRevealed });
+      setLocalStorageSaveState({
+        ...gameState,
+        solutionsRevealedAt: new Date(),
+      });
     }
   };
 
-  return { ...gameState, setFoundWords, setSolutionsRevealed } as const;
+  const setAmendmentsDismissed = async () => {
+    setGameState({
+      ...gameState,
+      amendmentsDismissed: true,
+      amendmentsDismissedAt: new Date(),
+    });
+    if (isLoggedIn) {
+      await userDismissAmendments(date);
+    } else {
+      setLocalStorageSaveState({
+        ...gameState,
+        amendmentsDismissed: true,
+        amendmentsDismissedAt: new Date(),
+      });
+    }
+  };
+
+  return {
+    ...gameState,
+    setFoundWords,
+    setSolutionsRevealed,
+    setAmendmentsDismissed,
+  } as const;
 };

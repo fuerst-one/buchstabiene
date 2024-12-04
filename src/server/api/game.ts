@@ -38,7 +38,9 @@ export const userGetSavedGame = async (date: string) => {
   });
   return savedGame ?? null;
 };
-export type SavedGame = NonNullable<ReturnType<typeof userGetSavedGame>>;
+export type SavedGame = NonNullable<
+  Awaited<ReturnType<typeof userGetSavedGame>>
+>;
 
 export const userGetPlayedGames = async () => {
   const userId = (await getServerSessionUser())?.id;

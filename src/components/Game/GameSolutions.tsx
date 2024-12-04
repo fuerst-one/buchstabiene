@@ -4,8 +4,9 @@ import { capitalize, cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ThumbsDown, TriangleAlert } from "lucide-react";
 import { userAddWordVotes, userDeleteWordVote } from "@/server/api/wordVotes";
-import { SaveState, useSaveState } from "./useSaveState";
+import { useSaveState } from "./useSaveState";
 import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
+import { SavedGame } from "@/server/api/game";
 
 export const GameSolutions = ({
   date,
@@ -18,21 +19,21 @@ export const GameSolutions = ({
   date: string;
   solutions: string[] | null;
   isLoggedIn: boolean;
-  savedGame: SaveState | null;
+  savedGame: SavedGame | null;
   downvotes: string[];
   isAdmin?: boolean;
 }) => {
-  const { foundWords, solutionsRevealed, setSolutionsRevealed } = useSaveState({
-    date,
-    isLoggedIn,
-    isAdmin,
-    savedGame,
-  });
+  const { foundWords, solutionsRevealedAt, setSolutionsRevealed } =
+    useSaveState({
+      date,
+      isLoggedIn,
+      savedGame,
+    });
 
   return (
     <div className="w-full px-2">
       <div className="w-full rounded-sm bg-white/10 px-2 py-1">
-        {!solutionsRevealed ? (
+        {!solutionsRevealedAt ? (
           <div className="mb-8 mt-6 text-center">
             <p className="mb-2 font-semibold">
               <TriangleAlert className="inline size-4" /> Achtung: Das Spiel
@@ -42,7 +43,7 @@ export const GameSolutions = ({
               Du kannst weiterhin Wörter suchen, aber deine Punkte werden nicht
               mehr aktualisiert.
             </p>
-            <Button onClick={() => setSolutionsRevealed(true)} size="lg">
+            <Button onClick={() => setSolutionsRevealed()} size="lg">
               Lösungen anzeigen
             </Button>
           </div>

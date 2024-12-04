@@ -13,7 +13,7 @@ import { boolean } from "drizzle-orm/pg-core";
 import { json } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
-const jsonStringArray = sql<string[]>`(JSON_ARRAY())`;
+const jsonStringArray = sql<string[]>`('[]')`;
 
 export const users = pgTable("users", {
   id: text("id").notNull().primaryKey().$defaultFn(crypto.randomUUID),
@@ -85,7 +85,8 @@ export const savedGames = pgTable(
       .$type<string[]>()
       .notNull()
       .default(jsonStringArray),
-    solutionsRevealed: boolean("solutions_revealed").notNull().default(false),
+    solutionsRevealedAt: timestamp("solutions_revealed_at"),
+    amendmentsDismissedAt: timestamp("amendments_dismissed_at"),
   },
   (t) => ({
     unq: unique().on(t.userId, t.date),
@@ -142,7 +143,7 @@ export const dictionaryAmendments = pgTable("dictionary_amendments", {
     .$type<string[]>()
     .notNull()
     .default(jsonStringArray),
-  isApplied: boolean("is_applied").notNull().default(false),
+  appliedAt: timestamp("applied_at"),
 });
 export type DictionaryAmendment = typeof dictionaryAmendments.$inferSelect;
 export type DictionaryAmendmentInsert =

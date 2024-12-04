@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { encryptSolutions } from "@/components/Game/encryptSolutions";
 import { GameEncrypted } from "@/components/Game/Game";
+import { publicGetAmendmentsAffectingGame } from "@/server/api/dictionaryAmendments";
 
 // Cache for 1 day
 export const revalidate = 86400;
@@ -44,6 +45,7 @@ export default async function GameByDate({
     .filter((downvote) => gameData.possibleWords.includes(downvote.word))
     .filter((downvote) => downvote.vote < 0)
     .map((downvote) => downvote.word);
+  const amendments = await publicGetAmendmentsAffectingGame(dateString);
 
   return (
     <>
@@ -57,6 +59,7 @@ export default async function GameByDate({
           isLoggedIn={!!user}
           savedGame={savedGame}
           downvotes={downvotes}
+          amendments={amendments}
         />
       </Suspense>
     </>

@@ -13,9 +13,12 @@ import { isPangram } from "./utils";
 import { WordInput } from "./WordInput";
 import { DialogWinner } from "./DialogWinner";
 import { DialogCompleted } from "./DialogCompleted";
-import { useSaveState, SaveState } from "./useSaveState";
+import { useSaveState } from "./useSaveState";
 import { WordSuggestions } from "./WordSuggestions";
 import { wrapWithSolutionsDecrypter } from "./SolutionsDecrypter";
+import { AmendmentEffect } from "@/server/api/dictionaryAmendments";
+import { DialogAmendments } from "./DialogAmendments";
+import { SavedGame } from "@/server/api/game";
 
 const Game = ({
   date,
@@ -25,19 +28,29 @@ const Game = ({
   isLoggedIn,
   savedGame,
   downvotes,
+  amendments,
 }: {
   date: string;
   letterSet: string[];
   winningScore: number;
   solutions: string[] | null;
   isLoggedIn: boolean;
-  savedGame: SaveState | null;
+  savedGame: SavedGame | null;
   downvotes: string[];
+  amendments: AmendmentEffect[];
 }) => {
-  const { foundWords, solutionsRevealed, setFoundWords } = useSaveState({
+  const {
+    foundWords,
+    solutionsRevealedAt,
+    amendmentsDismissed,
+    amendmentsDismissedAt,
+    setFoundWords,
+    setAmendmentsDismissed,
+  } = useSaveState({
     date,
     isLoggedIn,
     savedGame,
+    amendments,
   });
 
   const [message, setMessage] = useState<Message | null>(null);
@@ -97,7 +110,7 @@ const Game = ({
 
     const oldFoundWords = foundWords ?? [];
     const newFoundWords = [...oldFoundWords, word];
-    if (!solutionsRevealed) {
+    if (!solutionsRevealedAt) {
       setFoundWords(newFoundWords);
     }
 
@@ -120,6 +133,12 @@ const Game = ({
 
   return (
     <div className="flex w-full flex-col gap-4 px-2">
+      <DialogAmendments
+        amendments={amendments}
+        amendmentsDismissedAt={amendmentsDismissedAt}
+        open={!amendmentsDismissed}
+        onOpenChange={setAmendmentsDismissed}
+      />
       <DialogWinner
         open={showWinningDialog}
         onOpenChange={setShowWinningDialog}
@@ -142,7 +161,7 @@ const Game = ({
       <WordInput
         letterSet={letterSet}
         message={message}
-        isRevealed={solutionsRevealed}
+        isRevealed={!!solutionsRevealedAt}
         onSubmit={submitWord}
         onCancelMessage={cancelMessage}
       />
