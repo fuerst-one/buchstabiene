@@ -26,10 +26,12 @@ export const setLocalStorageSaveState = (saveState: SaveState) => {
 export const useSaveState = ({
   date,
   isLoggedIn,
+  isAdmin,
   savedGame,
 }: {
   date: string;
   isLoggedIn: boolean;
+  isAdmin?: boolean;
   savedGame: SaveState | null;
 }) => {
   const [gameState, setGameState] = useState<SaveState>(() => {
@@ -43,7 +45,7 @@ export const useSaveState = ({
     return {
       date,
       foundWords: [],
-      solutionsRevealed: false,
+      solutionsRevealed: isAdmin ?? false,
     };
   });
 

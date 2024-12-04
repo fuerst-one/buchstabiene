@@ -1,25 +1,23 @@
 import { adminGetWordVotes } from "@/server/api/wordVotes";
-import { Downvotes } from "./Downvotes";
-import { Suggestions } from "./Suggestions";
+import { adminGetCurrentDictionary } from "@/server/api/game";
+import { Dictionary } from "./Dictionary";
+import { WordVotes } from "./WordVotes";
 
 export default async function AdminPage() {
   const wordVotes = await adminGetWordVotes();
   const suggestions = wordVotes.filter((vote) => vote.vote >= 0);
   const downvotes = wordVotes.filter((vote) => vote.vote < 0);
+  const { pangrams, otherWords } = await adminGetCurrentDictionary();
 
   return (
     <>
-      <h1>Admin</h1>
-      <div className="flex w-full flex-col gap-4 px-2">
-        <div className="w-full rounded-sm bg-white/10 px-2 py-1">
-          <h2>Downvotes</h2>
-          <Downvotes downvotes={downvotes} />
-        </div>
-        <div className="w-full rounded-sm bg-white/10 px-2 py-1">
-          <h2>Suggestions</h2>
-          <Suggestions suggestions={suggestions} />
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold">Admin</h1>
+      <Dictionary
+        pangrams={pangrams}
+        otherWords={otherWords}
+        downvotes={downvotes.map((vote) => vote.word)}
+      />
+      <WordVotes suggestions={suggestions} downvotes={downvotes} />
     </>
   );
 }

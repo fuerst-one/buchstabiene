@@ -3,10 +3,12 @@ import { savedGames } from "../db/schema";
 import { db } from "../db/db";
 import {
   getServerSessionUser,
+  serverAdminGuard,
   serverSessionGuard,
 } from "@/zustand/useServerAuth";
-import { getWinningScore } from "@/components/Game/utils";
+import { getWinningScore, isPangram } from "@/components/Game/utils";
 import { revalidatePath } from "next/cache";
+import { unique } from "@/lib/unique";
 
 export const publicGetGameByDate = async (date: string) => {
   const game = await db.query.games.findFirst({
@@ -81,4 +83,16 @@ export const userUpdateSavedGame = async (
 
   revalidatePath(`/spielen/[date]`, "page");
   return inserted.length > 0;
+};
+
+export const adminGetCurrentDictionary = async () => {
+  await serverAdminGuard();
+
+  const allGames = await db.query.games.findMany();
+  const allWords = allGames.flatMap((game) => game.possibleWords);
+  const uniqueWords = unique(allWords).toSorted();
+  const pangrams = uniqueWords.filter((word) => isPangram(word));
+  const otherWords = uniqueWords.filter((word) => !isPangram(word));
+
+  return { pangrams, otherWords };
 };
