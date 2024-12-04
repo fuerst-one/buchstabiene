@@ -6,13 +6,13 @@ import { arrayEqual } from "@/lib/arrayEqual";
 
 export const DEFAULT_GAME_GEN_OPTIONS: GameGenOptions = {
   letterSetFilter: {
-    letters: "enisrat".split(""),
+    letters: "enisrt".split(""),
     maxCount: 2,
   },
   gameFilter: {
-    minWords: 20,
-    maxWords: undefined,
-    minScore: 90,
+    minWords: 15,
+    maxWords: 35,
+    minScore: 45,
     maxScore: 150,
   },
 };
@@ -62,6 +62,25 @@ export const logGameScoreDistribution = (games: GameSource[]) => {
         .join(""),
     ]),
   );
+
+  const wordCountTable = Object.fromEntries(
+    Object.entries(
+      games.reduce(
+        (acc, { possibleWords }) => {
+          const countGroup = Math.floor(possibleWords.length / 10) * 10;
+          acc[countGroup] = (acc[countGroup] || 0) + 1;
+          return acc;
+        },
+        {} as Record<number, number>,
+      ),
+    ).map(([wordCount, count]) => [
+      wordCount,
+      Array(Math.round(count / 20))
+        .fill("*")
+        .join(""),
+    ]),
+  );
+
   console.log({
     totalGames: games.length,
     winningScoreMedian: games.sort((a, b) => a.winningScore - b.winningScore)[
@@ -70,6 +89,7 @@ export const logGameScoreDistribution = (games: GameSource[]) => {
     winningScoreMean:
       games.reduce((acc, { winningScore }) => acc + winningScore, 0) /
       games.length,
-    ...scoreTable,
+    scoreTable,
+    wordCountTable,
   });
 };

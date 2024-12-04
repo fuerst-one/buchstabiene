@@ -2,10 +2,11 @@ import {
   readRemovedWordsFile,
   readWordsFile,
   writeRemovedWordsFile,
+  writeRemovedWordsFileCache,
   writeWordFileCache,
   writeWordsFile,
 } from "./files";
-import { applyWordsChanges } from "./utils";
+import { applyWordsChanges, getWordsHash } from "./utils";
 
 /**
  * Amend word files in file system
@@ -31,6 +32,7 @@ export const amendWordFiles = async (
 
   // Add wordsToAdd to words and remove wordsToRemove from words
   const newWords = applyWordsChanges(currentWords, wordsToAdd, wordsToRemove);
+  const newWordsHash = await getWordsHash(newWords);
 
   console.log("Changes:");
   console.log(`${currentWords.length} words before changes.`);
@@ -43,9 +45,11 @@ export const amendWordFiles = async (
   } else {
     await writeRemovedWordsFile(newRemovedWords);
     await writeWordsFile(newWords);
-    await writeWordFileCache(newWords);
     console.log("Word files amended.");
   }
+
+  await writeRemovedWordsFileCache(newRemovedWords, newWordsHash);
+  await writeWordFileCache(newWords);
 
   return newWords;
 };

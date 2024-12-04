@@ -1,6 +1,6 @@
 import { gameDateString } from "@/lib/DateFormat";
 import { DEFAULT_GAME_GEN_OPTIONS, getWordsHash } from "./utils/utils";
-import { readWordsFile } from "./utils/files";
+import { readWordsFile, writeChangeLogFile } from "./utils/files";
 import { filterGames } from "./utils/filterGames";
 import { amendWordFiles } from "./utils/amendWordFiles";
 import { removeGames } from "./utils/removeGames";
@@ -45,18 +45,23 @@ export const updateGamesFromDbAmendments = async (
     );
 
     // Update games and saved games until including today with amendments
-    const { affectedGames: amendmentAffectedGames } = await amendExistingGames(
+    const affectedItems = await amendExistingGames(
       wordsToAdd,
       wordsToRemove,
       dryRun,
     );
 
+    const hash = await getWordsHash(newWords);
+    await writeChangeLogFile(affectedItems, hash);
+
     // Add affected games to the list
     affectedGames.push({
       amendmentId: amendment.id,
-      dates: amendmentAffectedGames.map((game) => game.date),
+      dates: affectedItems.affectedGames.map((game) => game.date),
     });
   }
+
+  console.log("Amendments completed, affected games:", affectedGames);
 
   // Skip games update if words hash is unchanged
   if ((await getWordsHash(newWords)) === (await getWordsHash(words))) {

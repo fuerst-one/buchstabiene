@@ -1,5 +1,4 @@
 import { getLettersFromWord } from "@/components/Game/utils";
-import { arrayUniqueOfUnique } from "@/lib/arrayUnique";
 import { readWordsFile } from "./files";
 import { DEFAULT_GAME_GEN_OPTIONS } from "./utils";
 import { LetterSetFilterOptions } from "./types";
@@ -41,15 +40,20 @@ export const generateLetterSets = (
   // Get unique letterSet sets for each main letter
   const letterSetsByMainLetterUnique = Object.entries(
     letterSetsByMainLetter,
-  ).map(
-    ([mainLetter, otherLetters]) =>
-      [mainLetter, arrayUniqueOfUnique(otherLetters)] as const,
-  );
+  ).map(([mainLetter, otherLetters]) => {
+    const uniqueOtherLetters: string[] = [];
+    for (const letters of otherLetters) {
+      if (!uniqueOtherLetters.includes(letters.sort().join(""))) {
+        uniqueOtherLetters.push(letters.sort().join(""));
+      }
+    }
+    return [mainLetter, uniqueOtherLetters] as const;
+  });
 
   // Join main letter with unique letterSet sets to get all unique letterSets
   const letterSets = letterSetsByMainLetterUnique.flatMap(
     ([mainLetter, otherLetters]) =>
-      otherLetters.map((letters) => mainLetter + letters.join("")),
+      otherLetters.map((letters) => mainLetter + letters),
   );
 
   console.log(`Generated ${letterSets.length} unique letter sets.`);

@@ -2,6 +2,7 @@ import { existsSync, promises as fs } from "fs";
 import { join } from "path";
 import { GameGenOptions, GameSource } from "./types";
 import { DEFAULT_GAME_GEN_OPTIONS, getWordsHash } from "./utils";
+import { AffectedGames } from "./amendExistingGames";
 
 const fileEncoding = "utf8";
 
@@ -53,6 +54,32 @@ export const writeWordFileCache = async (words: string[]) => {
   return await fs.writeFile(
     cacheWordsFile(hash),
     words.join("\n"),
+    fileEncoding,
+  );
+};
+const cacheRemovedWordsFile = (hash: string) =>
+  join(cacheHashDir(hash), "removedWords.txt");
+export const writeRemovedWordsFileCache = async (
+  words: string[],
+  hash: string,
+) => {
+  await createCacheDirIfNotExists(hash);
+  return await fs.writeFile(
+    cacheRemovedWordsFile(hash),
+    words.join("\n"),
+    fileEncoding,
+  );
+};
+
+const changeLogFile = (hash: string) =>
+  join(cacheHashDir(hash), "appliedChanges.json");
+export const writeChangeLogFile = async (
+  affectedGames: AffectedGames,
+  hash: string,
+) => {
+  return await fs.writeFile(
+    changeLogFile(hash),
+    JSON.stringify(affectedGames, null, 2),
     fileEncoding,
   );
 };

@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { games, savedGames } from "@/server/db/schema";
 import { gameDateDate, gameDateString } from "@/lib/DateFormat";
 import { applyWordsChanges, isWordsChanged } from "./utils";
+import { isPossibleWord } from "@/components/Game/utils";
 
 /**
  * Deletes words from games and saved games and creates a dictionary amendment.
@@ -25,7 +26,7 @@ export const amendExistingGames = async (
   while (true) {
     const gamesBatch = await db.query.games.findMany({
       where: (games, { lte }) =>
-        lte(games.date, gameDateString(gameDateDate().add(1, "day"))),
+        lte(games.date, gameDateString(gameDateDate())),
       orderBy: (games, { asc }) => [asc(games.date)],
       offset,
       limit: CHUNK_SIZE,
@@ -39,14 +40,30 @@ export const amendExistingGames = async (
     // Check if the game contains any of the words to delete.
     const affectedBatch = [];
     for (const game of gamesBatch) {
+      const letterSet = game.letterSet;
       const oldWords = game.possibleWords;
-      const newWords = applyWordsChanges(oldWords, wordsToAdd, wordsToRemove);
+      const possibleNewWords = wordsToAdd.filter((word) =>
+        isPossibleWord(word, letterSet.split("")),
+      );
+      const newWords = applyWordsChanges(
+        oldWords,
+        possibleNewWords,
+        wordsToRemove,
+      );
       if (!isWordsChanged(oldWords, newWords)) {
         continue;
       }
+      const addedWords = [
+        ...new Set(newWords).difference(new Set(oldWords)).values(),
+      ];
+      const removedWords = [
+        ...new Set(oldWords).difference(new Set(newWords)).values(),
+      ];
       affectedBatch.push({
-        ...game,
+        date: game.date,
         newWords,
+        addedWords,
+        removedWords,
       });
     }
 
@@ -102,13 +119,19 @@ export const amendExistingGames = async (
     const affectedBatch = [];
     for (const savedGame of savedGamesBatch) {
       const oldWords = savedGame.foundWords;
-      const newWords = applyWordsChanges(oldWords, wordsToAdd, wordsToRemove);
+      // Important: We do not add words here, only remove them.
+      const newWords = applyWordsChanges(oldWords, [], wordsToRemove);
       if (!isWordsChanged(oldWords, newWords)) {
         continue;
       }
+      const removedWords = [
+        ...new Set(oldWords).difference(new Set(newWords)).values(),
+      ];
       affectedBatch.push({
-        ...savedGame,
+        date: savedGame.date,
+        userId: savedGame.userId,
         newWords,
+        removedWords,
       });
     }
 
@@ -146,3 +169,4 @@ export const amendExistingGames = async (
     affectedSavedGames,
   };
 };
+export type AffectedGames = Awaited<ReturnType<typeof amendExistingGames>>;
