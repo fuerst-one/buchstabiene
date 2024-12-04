@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { WordVote } from "@/server/api/wordVotes";
-import { DictionaryAmendment } from "@/server/db/schema";
-import { useState } from "react";
+import { SetStateAction, Dispatch, useState } from "react";
 
 type WordVoteWithCount = {
   word: string;
@@ -37,27 +36,22 @@ export const getWordVotesWithCount = (
 export const AmendmentList = ({
   wordVotes,
   label,
-  onSubmitSelected,
+  selectedWords,
+  onChangeSelectedWords,
   onAddWordVotes,
 }: {
   wordVotes: WordVoteWithCount[];
   label: string;
-  onSubmitSelected: (words: string[]) => Promise<DictionaryAmendment>;
+  selectedWords: string[];
+  onChangeSelectedWords: Dispatch<SetStateAction<string[]>>;
   onAddWordVotes: (words: string[]) => Promise<boolean | void>;
 }) => {
   const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
-  const [selectedWords, setSelectedWords] = useState<string[]>([]);
 
   const toggleSelectedWord = (word: string) => {
-    setSelectedWords((prev) =>
+    onChangeSelectedWords((prev) =>
       prev.includes(word) ? prev.filter((w) => w !== word) : [...prev, word],
     );
-  };
-
-  const addSelectedWords = async () => {
-    const amendment = await onSubmitSelected(selectedWords);
-    console.log(amendment);
-    setSelectedWords([]);
   };
 
   const addWordVotes = async (words: string[]) => {
@@ -66,25 +60,30 @@ export const AmendmentList = ({
   };
 
   return (
-    <div className="my-1 overflow-y-auto rounded-sm bg-white/10 px-2 py-1">
+    <>
+      <h2 className="mb-2 text-lg font-bold">
+        {label} ({wordVotes.length})
+      </h2>
       {wordVotes.length ? (
         <div className="flex flex-col gap-0.5">
-          {wordVotes.map(({ word, count, users }) => (
-            <Label
-              htmlFor={`word-${word}`}
-              key={word}
-              className="text-md flex cursor-pointer items-center justify-start gap-2"
-            >
-              <Checkbox
-                id={`word-${word}`}
-                checked={selectedWords.includes(word)}
-                onClick={() => toggleSelectedWord(word)}
-              />
-              <span className="w-6">{count}</span>
-              <span className="w-32">&quot;{word}&quot;</span>
-              <span className="w-full truncate">{users.join(", ")}</span>
-            </Label>
-          ))}
+          <div className="max-h-[500px] overflow-y-auto rounded-sm bg-white/10 px-2">
+            {wordVotes.map(({ word, count, users }) => (
+              <Label
+                htmlFor={`word-${word}`}
+                key={word}
+                className="text-md flex cursor-pointer items-center justify-start gap-2"
+              >
+                <Checkbox
+                  id={`word-${word}`}
+                  checked={selectedWords.includes(word)}
+                  onClick={() => toggleSelectedWord(word)}
+                />
+                <span className="w-6">{count}</span>
+                <span className="w-32">&quot;{word}&quot;</span>
+                <span className="w-full truncate">{users.join(", ")}</span>
+              </Label>
+            ))}
+          </div>
           <div className="my-1 flex gap-2">
             <WordVoteDialog
               label={`Add ${label}`}
@@ -96,7 +95,7 @@ export const AmendmentList = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setSelectedWords([])}
+              onClick={() => onChangeSelectedWords([])}
             >
               Deselect All
             </Button>
@@ -104,19 +103,16 @@ export const AmendmentList = ({
               size="sm"
               variant="outline"
               onClick={() =>
-                setSelectedWords(wordVotes.map(({ word }) => word))
+                onChangeSelectedWords(wordVotes.map(({ word }) => word))
               }
             >
               Select All
-            </Button>
-            <Button size="sm" onClick={addSelectedWords}>
-              Commit {label}
             </Button>
           </div>
         </div>
       ) : (
         <p>No {label} found</p>
       )}
-    </div>
+    </>
   );
 };

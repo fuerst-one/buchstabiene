@@ -1,14 +1,14 @@
 "use server";
-import { games, savedGames } from "../db/schema";
+import { savedGames } from "../db/schema";
 import { db } from "../db/db";
 import {
   getServerSessionUser,
   serverAdminGuard,
   serverSessionGuard,
 } from "@/zustand/useServerAuth";
-import { getWinningScore } from "@/components/Game/utils";
+import { getWinningScore, isPangram } from "@/components/Game/utils";
 import { revalidatePath } from "next/cache";
-import { asc, count } from "drizzle-orm";
+import { arrayUnique } from "@/lib/arrayUnique";
 
 export const publicGetGameByDate = async (date: string) => {
   const game = await db.query.games.findFirst({
@@ -85,18 +85,14 @@ export const userUpdateSavedGame = async (
   return inserted.length > 0;
 };
 
-export const adminGetRandomGame = async () => {
+export const adminGetCurrentDictionary = async () => {
   await serverAdminGuard();
 
-  const [{ count: gamesCount }] = await db
-    .select({ count: count() })
-    .from(games);
-  const randomIndex = Math.floor(Math.random() * gamesCount);
-  const [{ date }] = await db
-    .select()
-    .from(games)
-    .orderBy(asc(games.date))
-    .offset(randomIndex);
+  const allGames = await db.query.games.findMany();
+  const allWords = allGames.flatMap((game) => game.possibleWords);
+  const uniqueWords = arrayUnique(allWords).toSorted();
+  const pangrams = uniqueWords.filter((word) => isPangram(word));
+  const otherWords = uniqueWords.filter((word) => !isPangram(word));
 
-  return publicGetGameByDate(date);
+  return { pangrams, otherWords };
 };
