@@ -76,7 +76,7 @@ export const GameHighscores = ({
                         completedScore,
                       ).label
                     }{" "}
-                    - {highscore.foundWords.length} Wörter - {highscore.score}{" "}
+                    - {highscore.foundWordsCount} Wörter - {highscore.score}{" "}
                     Punkte
                   </span>
                 </div>
