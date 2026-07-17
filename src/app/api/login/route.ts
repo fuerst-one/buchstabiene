@@ -1,4 +1,4 @@
-import { checkCredentials } from "@/server/api/auth";
+import { checkCredentials } from "@/server/api/checkCredentials";
 import { NextResponse } from "next/server";
 
 export const POST = async (request: Request) => {

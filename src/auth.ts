@@ -4,6 +4,7 @@ import { db } from "@/server/db/db";
 import Credentials from "next-auth/providers/credentials";
 import { signInSchema } from "@/zod/auth";
 import { accounts, users } from "@/server/db/schema";
+import { checkCredentials } from "@/server/api/checkCredentials";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -21,14 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const { email, password } =
             await signInSchema.parseAsync(credentials);
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_PROTOCOL}${process.env.NEXT_PUBLIC_URL}/api/login`,
-            {
-              method: "POST",
-              body: JSON.stringify({ email, password }),
-            },
-          );
-          const user = await response.json();
+          const user = await checkCredentials(email, password);
           return user;
         } catch (error) {
           console.error(error);
