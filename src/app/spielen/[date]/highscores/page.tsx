@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { GameHighscores } from "@/components/Game/GameHighscores";
 import { getTotalScore, getWinningScore } from "@/components/Game/utils";
@@ -8,6 +9,19 @@ import { publicGetHighscoresByDate } from "@/server/api/highscores";
 import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ date: string }>;
+}): Promise<Metadata> {
+  const { date } = await params;
+  return {
+    alternates: {
+      canonical: `https://buchstabiene.fuerst.one/spielen/${encodeURIComponent(date)}/highscores`,
+    },
+  };
+}
 
 // Cache for 1 day
 export const revalidate = 86400;

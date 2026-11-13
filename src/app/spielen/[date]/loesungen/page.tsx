@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { GameNavigation } from "@/components/Game/GameNavigation";
 import { GameSolutionsEncrypted } from "@/components/Game/GameSolutions";
 import { dayjsTz } from "@/dayjs";
@@ -8,6 +9,19 @@ import { getServerSessionUser } from "@/zustand/useServerAuth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { encryptSolutions } from "@/components/Game/encryptSolutions";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ date: string }>;
+}): Promise<Metadata> {
+  const { date } = await params;
+  return {
+    alternates: {
+      canonical: `https://buchstabiene.fuerst.one/spielen/${encodeURIComponent(date)}/loesungen`,
+    },
+  };
+}
 
 // Cache for 1 day
 export const revalidate = 86400;

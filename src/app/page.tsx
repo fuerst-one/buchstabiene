@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { dayjsTz } from "@/dayjs";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { userGetPlayedGames } from "@/server/api/game";
 import { redirect } from "next/navigation";
 import { GLOBAL_CONFIG } from "@/config";
+
+export const metadata: Metadata = {
+  title: "BuchstaBiene — tägliches deutsches Worträtsel",
+  description:
+    "Spiele BuchstaBiene: Finde deutsche Wörter aus sieben Buchstaben. Jeden Tag wartet ein neues kostenloses Worträtsel auf dich.",
+  alternates: { canonical: "https://buchstabiene.fuerst.one/" },
+  robots: { index: true, follow: true },
+};
 
 export default async function Home() {
   const playedGames = await userGetPlayedGames();

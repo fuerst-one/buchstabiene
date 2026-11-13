@@ -16,6 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://buchstabiene.fuerst.one"),
   title: "BuchstaBiene",
   description:
     "Finde alle Wörter, die du aus den Buchstaben zusammen setzen kannst.",
@@ -27,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body
         className={`${geistSans.variable} ${geistMono.variable} dark bg-background text-foreground antialiased`}
       >
